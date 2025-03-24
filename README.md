@@ -1,4 +1,11 @@
-# private-board
-Flutter + NextJS ( Devops Project )
-# Private Board Project
+2025년 3월 24일 한 것
 
+- 라우팅 구조 설계
+    - 구조는 위 그래프대로 생성함
+    - 스크립트를 사용하여 라우팅 구조를 만들었음
+- 리눅스 데스크탑 에뮬레이터 실행 환경 구축
+    - 안드로이드 에뮬레이터보다 훨씬 나은 것 같음
+- 앱 실행시 로딩중 화면 →로그인페이지 화면 까지의 흐름 설정 완료
+- 현재 로그인 페이지 화면은 아래와 같음
+
+![image](https://github.com/user-attachments/assets/1b045879-6877-4850-9b64-b0a8795ed633)
