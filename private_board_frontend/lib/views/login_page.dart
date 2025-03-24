@@ -61,8 +61,9 @@ class LoginPage extends StatelessWidget {
                     ),
                     onPressed: () {
                       // TODO: 로그인 처리 로직
+                      Navigator.pushReplacementNamed(context,'/home');
                     },
-                    child: const Te
+                    child: const Text(
                       '로그인',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
