@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/post.dart';
+import '../providers/post_provider.dart';
 
-class WritePage extends StatefulWidget {
+class WritePage extends ConsumerStatefulWidget {
   const WritePage({super.key});
 
   @override
-  State<WritePage> createState() => _WritePageState();
+  ConsumerState<WritePage> createState() => _WritePageState();
 }
 
-class _WritePageState extends State<WritePage> {
+class _WritePageState extends ConsumerState<WritePage> {
   final TextEditingController _controller = TextEditingController();
   static const int maxLength = 300;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,12 +64,24 @@ class _WritePageState extends State<WritePage> {
                   ),
                 ),
                 onPressed: () {
-                  // TODO: 글 등록 처리 (일단 SnackBar)
-                  if (_controller.text.trim().isNotEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('글이 작성되었습니다! (Mock)')),
+                  final content = _controller.text.trim();
+                  if (content.isNotEmpty) {
+                    final post = Post(
+                      author: '익명',
+                      content: content,
+                      createdAt: DateTime.now(),
                     );
-                    Navigator.pop(context); // 홈으로 돌아가기
+
+                    ref.read(postProvider.notifier).addPost(post);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('글이 등록되었습니다!')),
+                    );
+                    Navigator.pop(context);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('내용을 입력해주세요.')),
+                    );
                   }
                 },
                 child: const Text(

@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/post_provider.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final List<Map<String, String>> mockPosts = [
-      {'author': '익명1', 'content': '오늘 너무 힘들었어요... 그래도...' },
-      {'author': '익명2', 'content': '고마운 사람이 있어요 😊' },
-      {'author': '익명3', 'content': '다들 잘 지내고 계시죠?' },
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final posts = ref.watch(postProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF6F0), // 연한 살구톤
+      backgroundColor: const Color(0xFFFFF6F0),
       appBar: AppBar(
         title: const Text(
           'Private Board',
@@ -40,10 +38,12 @@ class HomePage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: ListView.builder(
-                itemCount: mockPosts.length,
+              child: posts.isEmpty
+                  ? const Center(child: Text('아직 작성된 글이 없어요 😢'))
+                  : ListView.builder(
+                itemCount: posts.length,
                 itemBuilder: (context, index) {
-                  final post = mockPosts[index];
+                  final post = posts[index];
                   return Card(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -55,9 +55,14 @@ class HomePage extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(post['author'] ?? '익명', style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text(post.author, style: const TextStyle(fontWeight: FontWeight.bold)),
                           const SizedBox(height: 8),
-                          Text(post['content'] ?? ''),
+                          Text(post.content),
+                          const SizedBox(height: 8),
+                          Text(
+                            _formatDateTime(post.createdAt),
+                            style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
                         ],
                       ),
                     ),
@@ -76,5 +81,10 @@ class HomePage extends StatelessWidget {
         child: const Icon(Icons.edit),
       ),
     );
+  }
+
+  String _formatDateTime(DateTime dateTime) {
+    return "${dateTime.year}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')} "
+        "${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}";
   }
 }
