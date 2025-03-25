@@ -34,3 +34,17 @@
 - 부드러운 카드 UI + 글쓰기 FAB 버튼
 - `/write` 라우팅 연결까지 준비됨
 
+
+## 2025-03-25 작업 정리: Private Board Flutter 프로젝트
+
+### 📌 오늘 한 작업
+
+- `Post` 모델 생성 (`lib/models/post.dart`)
+- `PostProvider` 생성 (StateNotifier 기반 Riverpod 상태관리)
+- `WritePage` 글쓰기 화면 구성
+    - `TextField` + 작성 버튼 UI
+    - 글 작성 시 Provider에 상태 저장
+- `main.dart`에 `ProviderScope` 적용 → Riverpod 전역 사용 설정
+- `HomePage`를 `ConsumerWidget`으로 리팩토링
+    - `ref.watch(postProvider)`로 글 리스트 실시간 표시
+
