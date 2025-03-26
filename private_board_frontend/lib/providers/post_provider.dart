@@ -1,18 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/post.dart';
+import '../services/post_api.dart';
 
-class PostNotifier extends StateNotifier<List<Post>> {
-  PostNotifier() : super([]);
+final postApiProvider = Provider<PostApi>((ref) => PostApi());
 
-  void addPost(Post post) {
-    state = [...state, post];
-  }
-
-  void clearPosts() {
-    state = [];
-  }
-}
-
-final postProvider = StateNotifierProvider<PostNotifier, List<Post>>(
-      (ref) => PostNotifier(),
-);
+final postListProvider = FutureProvider<List<Post>>((ref) async {
+  final api = ref.read(postApiProvider);
+  return api.fetchPosts();
+});

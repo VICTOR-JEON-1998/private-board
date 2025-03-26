@@ -63,26 +63,31 @@ class _WritePageState extends ConsumerState<WritePage> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   final content = _controller.text.trim();
-                  if (content.isNotEmpty) {
-                    final post = Post(
-                      author: '익명',
-                      content: content,
-                      createdAt: DateTime.now(),
-                    );
-
-                    ref.read(postProvider.notifier).addPost(post);
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('글이 등록되었습니다!')),
-                    );
-                    Navigator.pop(context);
-                  } else {
+                  if (content.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('내용을 입력해주세요.')),
                     );
+                    return;
                   }
+
+                  final post = Post(
+                    author: '익명',
+                    content: content,
+                    createdAt: DateTime.now(),
+                  );
+
+                  final api = ref.read(postApiProvider);
+                  await api.createPost(post); // ✅ 글 추가
+
+                  ref.invalidate(postListProvider); // ✅ 글 리스트 다시 불러오기
+
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('글이 등록되었습니다!')),
+                  );
+                  Navigator.pop(context);
                 },
                 child: const Text(
                   '작성 완료',

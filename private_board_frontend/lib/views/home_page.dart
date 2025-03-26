@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/post.dart';
 import '../providers/post_provider.dart';
 
 class HomePage extends ConsumerWidget {
@@ -7,7 +8,7 @@ class HomePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final posts = ref.watch(postProvider);
+    final asyncPosts = ref.watch(postListProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFF6F0),
@@ -38,36 +39,40 @@ class HomePage extends ConsumerWidget {
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: posts.isEmpty
-                  ? const Center(child: Text('아직 작성된 글이 없어요 😢'))
-                  : ListView.builder(
-                itemCount: posts.length,
-                itemBuilder: (context, index) {
-                  final post = posts[index];
-                  return Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    elevation: 2,
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(post.author, style: const TextStyle(fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 8),
-                          Text(post.content),
-                          const SizedBox(height: 8),
-                          Text(
-                            _formatDateTime(post.createdAt),
-                            style: const TextStyle(fontSize: 12, color: Colors.grey),
-                          ),
-                        ],
+              child: asyncPosts.when(
+                data: (posts) => posts.isEmpty
+                    ? const Center(child: Text('아직 작성된 글이 없어요 😢'))
+                    : ListView.builder(
+                  itemCount: posts.length,
+                  itemBuilder: (context, index) {
+                    final post = posts[index];
+                    return Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                    ),
-                  );
-                },
+                      elevation: 2,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(post.author, style: const TextStyle(fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 8),
+                            Text(post.content),
+                            const SizedBox(height: 8),
+                            Text(
+                              _formatDateTime(post.createdAt),
+                              style: const TextStyle(fontSize: 12, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, _) => Center(child: Text('오류 발생: $e')),
               ),
             ),
           ],
