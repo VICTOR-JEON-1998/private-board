@@ -48,3 +48,32 @@
 - `HomePage`를 `ConsumerWidget`으로 리팩토링
     - `ref.watch(postProvider)`로 글 리스트 실시간 표시
 
+
+## ✅ 2025년 3월 26일 작업 정리 — Private Board Flutter 프로젝트
+
+### 📌 오늘의 핵심 작업:
+
+> 🔧 실제 API 없이도 Mock API 기반의 전체 글 작성/조회 흐름 완성
+> 
+
+---
+
+### 🧱 구조 설계 및 구현
+
+### ✅ 1. Mock API 기반 구조 설계 및 구성
+
+- `PostApi` 클래스 생성 → 내부에 mock 리스트 사용
+- `fetchPosts()` / `createPost()` 구현
+- `FutureProvider`로 상태관리 (`postListProvider`)
+
+### ✅ 2. HomePage 수정
+
+- `ConsumerWidget`에서 `postListProvider` 사용
+- `.when(data/loading/error)` 처리
+- 작성된 글 리스트를 카드 형태로 표시
+
+### ✅ 3. WritePage 수정
+
+- 글 작성 시 `PostApi.createPost()` 호출
+- 작성 후 `postListProvider` 무효화 → 리스트 새로고침
+- 작성 완료 SnackBar + `Navigator.pop()` 처리
