@@ -77,3 +77,59 @@
 - 글 작성 시 `PostApi.createPost()` 호출
 - 작성 후 `postListProvider` 무효화 → 리스트 새로고침
 - 작성 완료 SnackBar + `Navigator.pop()` 처리
+
+
+
+
+
+
+# Private Board Backend
+
+Next.js 기반의 Flutter 앱 전용 백엔드 API 서버입니다.  
+Prisma + PostgreSQL을 사용하며, RESTful API 구조로 인증 기능을 제공합니다.
+
+---
+
+## ✅ 2025-03-29 작업 기록
+
+### 📦 초기 프로젝트 세팅
+- `npx create-next-app`로 백엔드 전용 프로젝트 생성 (TypeScript 기반)
+- ESLint 적용, Tailwind/App Router/Turbopack 제외
+- import alias `@/*` 적용
+
+### 🐳 Docker 기반 PostgreSQL 세팅
+- `postgres:15` 이미지를 사용해 Docker로 로컬 DB 컨테이너 구성
+- DB명: `private_board`, 사용자: `admin`, 비밀번호: `secret123`
+- `.env` 파일에 `DATABASE_URL` 환경변수 등록
+
+### 🧬 Prisma ORM 초기화
+- `npx prisma init` 실행 후 `schema.prisma` 작성
+- `User` 모델 정의:
+  - `id`, `email`, `password`, `createdAt`
+- `npx prisma migrate dev` 로 DB 마이그레이션 완료
+- Prisma Client 자동 생성 완료
+
+### 🔐 회원가입 API 구현
+- `POST /api/auth/register`
+- 기능:
+  - 이메일, 비밀번호 입력값 검증
+  - 중복 이메일 체크
+  - `bcryptjs`로 비밀번호 해싱
+  - Prisma로 유저 DB 저장
+  - 유저 정보 응답 (id, email, createdAt)
+- 테스트:
+  - Postman으로 테스트 완료 (`201 Created` 응답 확인)
+
+---
+
+## 🧭 다음 작업 예정
+
+- `POST /api/auth/login` API 구현
+- 비밀번호 검증 및 JWT 발급
+- Flutter 연동 고려한 토큰 기반 인증 처리
+
+---
+
+## 📌 커밋 예정 메시지
+
+
