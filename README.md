@@ -130,6 +130,20 @@ Prisma + PostgreSQL을 사용하며, RESTful API 구조로 인증 기능을 제�
 
 ---
 
-## 📌 커밋 예정 메시지
+---
+
+## ✅ 2025-04-11 작업 기록
+
+### 🔐 로그인 후 인증 유지 흐름 완성
+- JWT 인증 토큰 검증 유틸 함수(`lib/verifyToken.ts`) 구현
+- 인증된 사용자만 접근 가능한 API `/api/me` 생성
+- Authorization 헤더(`Bearer <token>`)에서 토큰 추출 및 검증
+- Prisma를 통해 해당 유저 정보 조회 후 응답
+- Postman을 통해 정상 인증 테스트 성공
+
+### 🧠 흐름 정리
+1. 로그인 API로 JWT 토큰 발급
+2. 토큰을 Authorization 헤더에 포함
+3. `/api/me` API 호출 시 토큰 검증 → 유저 정보 반환
 
 
