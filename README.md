@@ -147,3 +147,21 @@ Prisma + PostgreSQL을 사용하며, RESTful API 구조로 인증 기능을 제�
 3. `/api/me` API 호출 시 토큰 검증 → 유저 정보 반환
 
 
+# Private Board Backend - Auth & Post API
+
+## ✅ 주요 작업 요약 (2025.04.16)
+
+### 🔐 Auth 기능
+- 회원가입 API (`POST /api/auth/signup`)
+- 로그인 API (`POST /api/auth/login`)
+- JWT 기반 인증 유지 API (`GET /api/me`)
+
+### 📝 게시글 기능
+- 게시글 작성 (`POST /api/posts`) ✅ 인증 필요
+- 게시글 전체 조회 (`GET /api/posts`)
+- 게시글 단일 조회 (`GET /api/posts/:id`)
+- 게시글 수정 (`PUT /api/posts/:id`) ✅ 인증 필요
+- 게시글 삭제 (`DELETE /api/posts/:id`) ✅ 인증 필요
+- 🔐 본인 게시글만 수정/삭제 가능 (authorId 체크)
+
+---

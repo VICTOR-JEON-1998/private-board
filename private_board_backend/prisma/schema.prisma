@@ -12,4 +12,17 @@ model User {
   email     String   @unique
   password  String
   createdAt DateTime @default(now())
+
+  posts     Post[]
+}
+
+model Post {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
 }
