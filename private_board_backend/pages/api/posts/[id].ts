@@ -98,13 +98,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'GET') {
     try {
       const post = await prisma.post.findUnique({
-        where: { id: String(id) },
+        where: { id: req.query.id as string },
         include: {
           author: {
-            select: { email: true }
-          }
-        }
-      })
+            select: {
+              id: true,       // ✅ 반드시 포함!
+              email: true,
+            },
+          },
+        },
+      });
+
 
       if (!post) {
         return res.status(404).json({ message: 'Post not found' })

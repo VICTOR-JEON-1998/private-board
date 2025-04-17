@@ -47,10 +47,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         orderBy: { createdAt: 'desc' },
         include: {
           author: {
-            select: { email: true }
-          }
-        }
-      })
+            select: {
+              id: true,       // ✅ 추가!
+              email: true,
+            },
+          },
+        },
+      });
+
 
       return res.status(200).json(posts)
     } catch (err) {

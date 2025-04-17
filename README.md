@@ -149,6 +149,9 @@ Prisma + PostgreSQL을 사용하며, RESTful API 구조로 인증 기능을 제�
 
 # Private Board Backend - Auth & Post API
 
+## 📅 2025-04-17 작업일지
+
+
 ## ✅ 주요 작업 요약 (2025.04.16)
 
 ### 🔐 Auth 기능
@@ -165,3 +168,22 @@ Prisma + PostgreSQL을 사용하며, RESTful API 구조로 인증 기능을 제�
 - 🔐 본인 게시글만 수정/삭제 가능 (authorId 체크)
 
 ---
+### ✅ 주요 완료 항목
+- Flutter 프론트엔드에서 로그인 / 회원가입 / 인증 유지 기능 연동 완료
+- 게시글 작성 / 전체 조회 / 단일 조회 기능 프론트 연동 완료
+- 게시글 수정 / 삭제 기능 프론트 연동 완료
+- `PostDetailPage`에 본인 글일 경우만 수정/삭제 버튼 보이도록 조건부 렌더링 구현
+- Prisma 백엔드에서 `author.id` 포함되도록 쿼리 수정 (`findMany`, `findUnique`)
+
+---
+
+### 🐞 추후 확인 필요
+- 현재 `currentUserId`가 null로 나오는 이슈 발생 → 본인 게시글임에도 수정/삭제 버튼이 비노출됨
+- `/api/me` 호출 실패 또는 SharedPreferences에서 토큰 불러오기 실패 가능성 있음
+- 다음 접속 시 콘솔 로그와 API 응답 디버깅 필요
+
+---
+
+### 💡 다음 작업 예정
+- `PostDetailPage`에서 사용자 정보 동기화 문제 해결 (`currentUserId`)
+- 댓글 기능 또는 좋아요 기능 중 선택하여 기능 확장 예정
