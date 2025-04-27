@@ -187,3 +187,5 @@ Prisma + PostgreSQL을 사용하며, RESTful API 구조로 인증 기능을 제�
 ### 💡 다음 작업 예정
 - `PostDetailPage`에서 사용자 정보 동기화 문제 해결 (`currentUserId`)
 - 댓글 기능 또는 좋아요 기능 중 선택하여 기능 확장 예정
+
+

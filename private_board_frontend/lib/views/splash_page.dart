@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -11,20 +12,23 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 2), () {
-      Navigator.pushReplacementNamed(context, '/login');
-    });
+    _checkAuth();
+  }
+
+  Future<void> _checkAuth() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('accessToken');
+    if (token != null && token.isNotEmpty) {
+      Navigator.pushReplacementNamed(context, '/posts'); // 글 목록으로
+    } else {
+      Navigator.pushReplacementNamed(context, '/login'); // 로그인으로
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      body: Center(
-        child: Text(
-          '로딩 중...',
-          style: TextStyle(fontSize: 24),
-        ),
-      ),
+      body: Center(child: CircularProgressIndicator()),
     );
   }
 }
