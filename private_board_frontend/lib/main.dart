@@ -26,6 +26,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Private Board',
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        fontFamily: 'NanumGothic', // 👈 여기 추가
+      ),
       home: FutureBuilder(
         future: getStartPage(),
         builder: (context, snapshot) {

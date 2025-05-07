@@ -71,11 +71,13 @@ class _PostDetailPageState extends State<PostDetailPage> {
               (e) => (e['users'] as List?)?.contains(me) ?? false,
           orElse: () => null,
         )?['emoji'];
+
+        // 4. 깊은 복사로 UI 갱신 유도
+        emojiList = List<Map<String, dynamic>>.from(emojiList);
       });
     } catch (e) {
       print('[이모지 디버깅] 예외 발생: $e');
       setState(() {
-        // 실패 시에도 이모지 3개는 항상 보이게!
         emojiList = [
           {'emoji': '👍', 'key': 'like',  'count': 0},
           {'emoji': '😂', 'key': 'laugh', 'count': 0},
@@ -86,17 +88,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
     }
   }
 
-
-  /// 이모지 키 -> 네이티브 이모지 변환
-  String _emojiFromKey(String key) {
-    switch (key) {
-      case 'like': return '👍';
-      case 'laugh': return '😂';
-      case 'wow': return '😮';
-      default: return '❓';
-    }
-  }
-
   /// 이모지 공감/취소 요청
   Future<void> _handleEmojiTap(String emojiKey) async {
     final res = await PostApi.reactToPost(widget.post['id'].toString(), emojiKey);
@@ -104,7 +95,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
       if (res == null) return;
 
       if (res['status'] == 'reacted') {
-        // 기존에 내가 누른 이모지가 있고 그게 현재 누른 것과 다르면 카운트 -1
         if (selectedEmojiKey != null && selectedEmojiKey != emojiKey) {
           final old = emojiList.firstWhere(
                 (e) => e['key'] == selectedEmojiKey,
@@ -112,7 +102,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
           );
           if (old['key'] != null) old['count'] = (old['count'] ?? 1) - 1;
         }
-        // 선택한 이모지 카운트 +1
         final cur = emojiList.firstWhere(
               (e) => e['key'] == emojiKey,
           orElse: () => {'key': null, 'count': 0, 'emoji': null},
@@ -120,7 +109,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
         if (cur['key'] != null) cur['count'] = (cur['count'] ?? 0) + 1;
         selectedEmojiKey = emojiKey;
       } else if (res['status'] == 'unreacted') {
-        // 내가 이미 눌렀던 이모지라면 카운트 -1, 선택 해제
         final cur = emojiList.firstWhere(
               (e) => e['key'] == emojiKey,
           orElse: () => {'key': null, 'count': 0, 'emoji': null},
@@ -128,10 +116,15 @@ class _PostDetailPageState extends State<PostDetailPage> {
         if (cur['key'] != null) cur['count'] = (cur['count'] ?? 1) - 1;
         selectedEmojiKey = null;
       }
+
+      // 다시 복사해서 빌드 유도
+      emojiList = List<Map<String, dynamic>>.from(emojiList);
     });
   }
 
-
+  int getCount(String key) {
+    return emojiList.firstWhere((e) => e['key'] == key, orElse: () => {'count': 0})['count'];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -173,12 +166,11 @@ class _PostDetailPageState extends State<PostDetailPage> {
             Text('작성자: $email', style: const TextStyle(fontSize: 14)),
             Text('작성일: $createdAt', style: const TextStyle(fontSize: 14)),
             const Divider(height: 32, thickness: 1),
-            // 🟠 이모지 공감 UI 추가!
             if (emojiList.isNotEmpty)
               EmojiReactionRow(
-              emojiList: emojiList,
-              selectedEmojiKey: selectedEmojiKey,
-              onTap: _handleEmojiTap,
+                emojiList: emojiList,
+                selectedEmojiKey: selectedEmojiKey,
+                onTap: _handleEmojiTap,
               ),
             const SizedBox(height: 20),
             Expanded(
@@ -192,7 +184,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
     );
   }
 
-  // --- 수정/삭제 함수는 기존과 동일 ---
   void _handleEdit(Map<String, dynamic> post) async {
     final titleCtrl = TextEditingController(text: post['title']);
     final contentCtrl = TextEditingController(text: post['content']);
@@ -265,5 +256,4 @@ class _PostDetailPageState extends State<PostDetailPage> {
       );
     }
   }
-
 }

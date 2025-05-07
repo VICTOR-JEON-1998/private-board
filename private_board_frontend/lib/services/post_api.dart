@@ -113,7 +113,7 @@ class PostApi {
     try {
       final response = await _dio.post(
         '$_baseUrl/api/posts/$postId/reactions',
-        data: {'emoji': emojiKey},
+        data: {'emojiKey': emojiKey},
         options: Options(
           headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'},
         ),

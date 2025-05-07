@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 
 class EmojiReactionRow extends StatelessWidget {
-  final List<Map<String, dynamic>> emojiList; // [{emoji: "👍", count: 3, key: "like"}, ...]
-  final String? selectedEmojiKey; // ex: "like"
+  final List<Map<String, dynamic>> emojiList;
+  final String? selectedEmojiKey;
   final void Function(String emojiKey) onTap;
 
   const EmojiReactionRow({
-    Key? key,
+    super.key,
     required this.emojiList,
     required this.selectedEmojiKey,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
