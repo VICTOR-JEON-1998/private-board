@@ -60,12 +60,14 @@ class _PostDetailPageState extends State<PostDetailPage> {
           {'emoji': '😮', 'key': 'wow',   'count': 0},
         ];
         // 2. 서버에서 온 reactions로 count 덮어쓰기
+        // 2. 서버에서 온 reactions로 count 덮어쓰기
         for (var e in reactions) {
-          final idx = emojiList.indexWhere((em) => em['key'] == e['emoji']);
+          final idx = emojiList.indexWhere((em) => em['key'] == e['emojiKey']);
           if (idx != -1) {
-            emojiList[idx]['count'] = e['count'] ?? 0;
+            emojiList[idx]['count'] = (emojiList[idx]['count'] ?? 0) + 1;  // ✅ 누적
           }
         }
+
         // 3. 내가 누른 이모지 찾기
         selectedEmojiKey = reactions.firstWhere(
               (e) => (e['users'] as List?)?.contains(me) ?? false,
@@ -120,6 +122,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
       // 다시 복사해서 빌드 유도
       emojiList = List<Map<String, dynamic>>.from(emojiList);
     });
+    await _loadReactions();
   }
 
   int getCount(String key) {

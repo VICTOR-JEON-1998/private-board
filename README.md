@@ -220,3 +220,77 @@ Prisma + PostgreSQL을 사용하며, RESTful API 구조로 인증 기능을 제�
 
 - 프론트엔드 이슈(상태 관리, UI, 인증, 빌드)는 모두 해결!
 - 서버 500 에러만 잡으면 완성도 급상승!
+
+
+
+# 🛠️ 2025-05-13 - PB 프로젝트 이모지 리액션 디버깅 기록
+
+## 1. 문제 현상
+
+- 이모지를 눌러도 숫자(count)가 갱신되지 않음
+- 선택한 이모지가 UI에서 표시되지 않음 (selectedEmojiKey == null)
+- 서버에는 정상적으로 반영되고 있음 (200 OK 응답)
+
+---
+
+## 2. 원인 분석
+
+- 클라이언트에서 서버 응답을 `emojiKey`가 아닌 `emoji`로 비교함
+- selected 이모지를 식별할 때 `users.contains(id)` 방식으로 접근 (하지만 서버는 `userId`만 줌)
+- POST 요청 후 `_loadReactions()`를 호출하지 않아 UI와 서버 상태 불일치 발생
+
+---
+
+## 3. 해결 내용
+
+### ✅ 3.1 count 비교 키 수정
+
+```dart
+// before
+final idx = emojiList.indexWhere((em) => em['key'] == e['emoji']);
+
+// after
+final idx = emojiList.indexWhere((em) => em['key'] == e['emojiKey']);
+if (idx != -1) {
+  emojiList[idx]['count'] = (emojiList[idx]['count'] ?? 0) + 1;
+}
+```
+
+### ✅ 3.2 선택 이모지 판별 로직 수정
+
+```dart
+// before
+selectedEmojiKey = reactions.firstWhere(
+  (e) => (e['users'] as List?)?.contains(currentUserId) ?? false,
+  orElse: () => null,
+)?['emoji'];
+
+// after
+selectedEmojiKey = reactions.firstWhere(
+  (e) => e['userId'] == currentUserId,
+  orElse: () => null,
+)?['emojiKey'];
+```
+
+### ✅ 3.3 POST 후 상태 재동기화
+
+```dart
+await PostApi.reactToPost(postId, emojiKey);
+await _loadReactions(); // 화면을 서버와 동기화
+```
+
+---
+
+## 4. 결과
+
+- ✅ 이모지 count 실시간 반영됨
+- ✅ 선택된 이모지도 정상 표시됨
+- ✅ 서버 상태와 UI 정합성 유지 완료
+
+---
+
+## 5. 오늘의 교훈
+
+- 프론트와 백엔드 데이터 구조가 정확히 일치해야 한다
+- 식별자 기반 비교는 데이터 정합성의 핵심이다
+- 상태 기반 UI에서는 비동기 작업 후 재로드가 매우 중요하다

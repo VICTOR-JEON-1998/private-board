@@ -34,7 +34,7 @@ export default async function handler(req, res) {
     const existing = await prisma.reaction.findFirst({
       where: {
         postId,
-        userId: user.id,
+        userId: user.userId,
       },
     })
 
