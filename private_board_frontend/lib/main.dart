@@ -12,7 +12,13 @@ class MyApp extends StatelessWidget {
 
   Future<Widget> getStartPage() async {
     final token = await AuthService.getToken();
-    return token != null ? const PostListPage() : const LoginPage();
+    print('앱 시작 토큰 체크: "$token"'); // (디버깅용)
+    // 아래처럼 null 또는 빈 문자열 다 체크!
+    if (token == null || token.isEmpty) {
+      return const LoginPage();
+    } else {
+      return const PostListPage();
+    }
   }
 
   @override
@@ -20,6 +26,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Private Board',
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        fontFamily: 'NanumGothic', // 👈 여기 추가
+      ),
       home: FutureBuilder(
         future: getStartPage(),
         builder: (context, snapshot) {
