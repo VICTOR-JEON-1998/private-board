@@ -13,8 +13,24 @@ model User {
   password  String
   createdAt DateTime @default(now())
 
+  // 🔹 추가된 필드들
+  role      Role     @default(USER)
+  groupId   String?  // 그룹에 소속될 수 있음
+  group     Group?   @relation(fields: [groupId], references: [id])
+
   posts     Post[]
   reactions Reaction[]
+}
+
+model Group {
+  id             String   @id @default(uuid())
+  name           String
+  invitationCode String   @unique
+  hasAdmin       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  users          User[]
+  posts          Post[]
 }
 
 model Post {
@@ -26,6 +42,9 @@ model Post {
 
   author    User     @relation(fields: [authorId], references: [id])
   authorId  String
+
+  groupId   String   // 🔹 작성된 글이 어떤 그룹에 속하는지
+  group     Group    @relation(fields: [groupId], references: [id])
 
   reactions Reaction[]
 }
@@ -45,3 +64,7 @@ model Reaction {
   @@unique([userId, postId]) // 한 게시글당 한 유저는 하나의 반응만
 }
 
+enum Role {
+  USER
+  ADMIN
+}
