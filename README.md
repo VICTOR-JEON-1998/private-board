@@ -294,3 +294,34 @@ await _loadReactions(); // 화면을 서버와 동기화
 - 프론트와 백엔드 데이터 구조가 정확히 일치해야 한다
 - 식별자 기반 비교는 데이터 정합성의 핵심이다
 - 상태 기반 UI에서는 비동기 작업 후 재로드가 매우 중요하다
+
+
+# 📦 2025-05-14 - 그룹 모델 도입 및 마이그레이션 완료
+
+## ✅ 주요 작업 요약
+
+### 1. Prisma 모델 업데이트
+- `Group` 모델 신규 생성 (id, name, invitationCode, hasAdmin, createdAt)
+- `User` 모델에 `groupId`, `role` 필드 추가 (`role`은 enum: USER / ADMIN)
+- `Post` 모델에 `groupId` 필드 추가
+
+### 2. 마이그레이션 이슈 해결
+- 기존 Post 데이터가 존재해 `groupId` NOT NULL 제약이 오류 발생
+- 해결:
+  - `Group` 테이블을 먼저 생성
+  - 기본 그룹 레코드 삽입 (`id: '0000...'`)
+  - `Post.groupId`에 default 값으로 지정
+  - 외래키 및 인덱스 설정
+
+### 3. 결과
+- 마이그레이션 성공 (`npx prisma migrate dev`)
+- Prisma Client 재생성 완료
+- 그룹 기반 기능 개발의 토대 확보
+
+---
+
+## 🧠 향후 예정 작업
+
+- 그룹 생성 API
+- 초대 코드 기반 그룹 참여 API
+- 관리자 기반 글/익명 분기 처리
