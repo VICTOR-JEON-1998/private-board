@@ -325,3 +325,80 @@ await _loadReactions(); // 화면을 서버와 동기화
 - 그룹 생성 API
 - 초대 코드 기반 그룹 참여 API
 - 관리자 기반 글/익명 분기 처리
+
+# ✅ Private Board Ver5 - 2025-05-21 작업 기록
+
+## 🎯 오늘의 목표
+그룹(Group) 생성/참여 기능을 위한 백엔드 + API 연동 테스트 기반 구축
+
+---
+
+## 📁 프로젝트 구조 요약
+
+- `private_board_backend`: Next.js 기반 백엔드 (API Routes)
+- `private_board_frontend`: Flutter 기반 프론트엔드
+
+---
+
+## ✅ 오늘 작업 정리
+
+### 1️⃣ 백엔드 API 경로 오류 디버깅
+
+- 문제: `/groups/create` 요청 시 404 오류 발생
+- 원인: `pages/api/groups/create.ts` 파일이 존재하지 않음 (Next.js는 파일 기반 라우팅)
+- 해결: `create.ts` 파일 새로 생성하여 API 경로 인식되도록 처리
+
+---
+
+### 2️⃣ 그룹 생성 API 구현 (Dummy Version)
+
+#### 📄 경로
+```
+/private_board_backend/pages/api/groups/create.ts
+```
+
+#### 📄 코드 예시
+```ts
+import { NextApiRequest, NextApiResponse } from 'next';
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
+
+  const { name, hasAdmin } = req.body;
+
+  if (!name || hasAdmin === undefined) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  // TODO: Prisma 연동 예정
+  return res.status(200).json({
+    groupId: 'dummy-group-id',
+    invitationCode: 'dummy-invite-code',
+  });
+}
+```
+
+---
+
+### 3️⃣ Postman 테스트 흐름 완료
+
+#### ✅ 테스트 흐름:
+
+1. `POST /api/auth/register` – 회원가입
+2. `POST /api/auth/login` – 로그인 & accessToken 발급
+3. `POST /api/groups/create`
+  - Header: `Authorization: Bearer <token>`
+  - Body: `{ "name": "test group", "hasAdmin": true }`
+  - ✅ 응답 성공 (200 OK) 확인
+
+---
+
+## 🧭 다음 작업 예정 (내일)
+
+1. ✅ Prisma 연동된 실질적인 그룹 생성 로직
+2. ✅ `/api/groups/join.ts` – 초대코드 기반 그룹 참여 API 구현
+3. ✅ `User.groupId` 업데이트 로직
+4. 🧪 Postman으로 그룹 참여까지 완성 테스트
+5. 📱 Flutter와 API 연결 (JoinGroupPage → 실제 API 연결)
