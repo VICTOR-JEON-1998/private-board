@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'pages/login_page.dart';
 import 'pages/post_list_page.dart';
 import 'services/auth_service.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    ProviderScope( // ✅ Riverpod 사용을 위한 최상위 Wrapper
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -13,11 +18,10 @@ class MyApp extends StatelessWidget {
   Future<Widget> getStartPage() async {
     final token = await AuthService.getToken();
     print('앱 시작 토큰 체크: "$token"'); // (디버깅용)
-    // 아래처럼 null 또는 빈 문자열 다 체크!
     if (token == null || token.isEmpty) {
       return const LoginPage();
     } else {
-      return const PostListPage();
+      return const PostListPage(); // TODO: 향후 GroupHomePage로 변경해도 됨
     }
   }
 
@@ -26,9 +30,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Private Board',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: 'NanumGothic', // 👈 여기 추가
-      ),
+      theme: ThemeData(fontFamily: 'NanumGothic'),
       home: FutureBuilder(
         future: getStartPage(),
         builder: (context, snapshot) {

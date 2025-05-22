@@ -25,8 +25,8 @@ class AuthService {
     }
   }
 
-  /// 🔑 로그인 및 토큰 저장
-  static Future<bool> login(String email, String password) async {
+  /// 🔑 로그인 및 토큰/유저ID 저장
+  static Future<Map<String, dynamic>?> login(String email, String password) async {
     final dio = Dio();
     try {
       final response = await dio.post(
@@ -37,20 +37,23 @@ class AuthService {
         },
         options: Options(headers: {'Content-Type': 'application/json'}),
       );
+
       print('로그인 응답 코드: ${response.statusCode}');
       print('로그인 응답 데이터: ${response.data}');
-      final token = response.data['accessToken'] ?? response.data['token'];
-      print('✔️ 파싱된 토큰: $token');
 
-      if (token != null) {
+      final token = response.data['accessToken'] ?? response.data['token'];
+      final userId = response.data['user']?['id'];
+
+      if (token != null && userId != null) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('accessToken', token);
-        return true;
+        await prefs.setString('userId', userId);
+        return response.data; // 전체 response 반환
       }
     } catch (e) {
       print('❌ 로그인 실패: $e');
     }
-    return false;
+    return null;
   }
 
   /// 현재 저장된 토큰 가져오기
@@ -59,10 +62,17 @@ class AuthService {
     return prefs.getString('accessToken');
   }
 
-  /// 로그아웃 (토큰 삭제)
+  /// 현재 저장된 유저 ID 가져오기
+  static Future<String?> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('userId');
+  }
+
+  /// 로그아웃 (토큰 + 유저ID 삭제)
   static Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('accessToken');
+    await prefs.remove('userId');
   }
 
   /// (선택) 토큰 유효성 검사 예시 (추가로 활용 가능)
