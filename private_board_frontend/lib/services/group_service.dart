@@ -1,29 +1,38 @@
+// ✅ GroupService - lib/services/group_service.dart
 import 'package:dio/dio.dart';
 
 class GroupService {
   final Dio dio;
-
   GroupService(this.dio);
 
   Future<Map<String, dynamic>> createGroup({
     required String name,
     required bool hasAdmin,
   }) async {
-    final response = await dio.post('/groups/create', data: {
-      'name': name,
-      'hasAdmin': hasAdmin,
-    });
-
-    return response.data;
+    try {
+      final response = await dio.post('/api/groups/create', data: {
+        'name': name,
+        'hasAdmin': hasAdmin,
+      });
+      return response.data;
+    } catch (e) {
+      throw Exception('그룹 생성 실패: $e');
+    }
   }
 
-  Future<String> joinGroup({
+  Future<Map<String, dynamic>> joinGroup({
     required String invitationCode,
+    required String userId,
   }) async {
-    final response = await dio.post('/groups/join', data: {
-      'invitationCode': invitationCode,
-    });
-
-    return response.data['message'];
+    try {
+      final response = await dio.post(
+        '/api/groups/join',
+        data: {'invitationCode': invitationCode},
+        options: Options(headers: {'x-user-id': userId}),
+      );
+      return response.data;
+    } catch (e) {
+      throw Exception('그룹 참여 실패: $e');
+    }
   }
 }
