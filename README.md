@@ -456,3 +456,81 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 2. `SharedPreferences` → `token`, `userId`로 자동 로그인 이어가기
 3. 그룹 내부 글 목록 불러오기 (PostList)
 4. 마니또 기능 기획 및 설계 시작
+
+
+# 📘 Private Board 개발 정리 (2025-05-22)
+
+## ✅ 오늘의 목표
+- 그룹 구조를 "관리자 승인 기반 커뮤니티"로 확정
+- 로그인 → 그룹 생성 → 초대코드 발급 → 참여 요청까지 전 기능 완성
+
+---
+
+## 🔐 로그인 기능 확인
+
+- `/api/auth/login` 테스트 성공
+- 토큰 + 유저 ID 정상 반환
+- Header에서 `x-user-id`로 유저 인증 처리
+
+---
+
+## 🏗️ 그룹 생성
+
+- API: `POST /api/groups/create`
+- 요청 시:
+  - `name` 필수
+  - `x-user-id` 헤더 필요
+- 처리 로직:
+  - 초대코드 자동 생성 (nanoid)
+  - 생성자는 자동으로 `ADMIN` 역할로 그룹에 소속됨
+- 응답:
+```json
+{
+  "groupId": "UUID형식",
+  "invitationCode": "랜덤6자리"
+}
+```
+
+---
+
+## 🧾 그룹 참여 요청
+
+- API: `POST /api/groups/join-request`
+- 요청 시:
+  - `invitationCode` 필드 필요
+  - `x-user-id` 헤더 필요
+- 처리 로직:
+  - 해당 초대코드의 그룹을 찾고
+  - `GroupJoinRequest` 모델에 PENDING 상태로 요청 저장
+  - 중복 요청 방지 처리 포함
+- 응답:
+```json
+{
+  "message": "Join request submitted",
+  "requestId": "..."
+}
+```
+
+---
+
+## ✅ 현재 흐름
+
+```text
+[1] 로그인
+ → [2] 그룹 생성 (관리자 자동 지정)
+   → [3] 초대코드 발급
+     → [4] 초대코드 입력 → 참여 요청 생성 (PENDING)
+       → [5] 관리자 승인 시 groupId 반영
+```
+
+---
+
+## 📌 다음 작업 제안
+
+- `/api/groups/pending-requests`: 승인 대기 목록
+- `/api/groups/approve/:id`: 관리자 승인 처리
+- Flutter: JoinGroupPage 연결 + 승인대기 UI
+
+---
+
+👍 테스트 및 흐름 완벽히 구현됨. 내일은 승인 관리 + 글 목록으로 이어서 연결 가능!
