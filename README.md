@@ -534,3 +534,106 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 ---
 
 👍 테스트 및 흐름 완벽히 구현됨. 내일은 승인 관리 + 글 목록으로 이어서 연결 가능!
+
+
+
+# 📘 Private Board 개발 코드 정리 - 2025-05-27
+
+## ✅ 오늘 구현한 주요 기능: 참여 요청 승인 시스템
+
+---
+
+## 1️⃣ `GET /api/groups/pending-requests`
+
+### ✅ 목적
+관리자가 자신의 그룹에 들어온 **참여 요청 목록(PENDING)** 을 확인할 수 있게 함.
+
+### ✅ 경로
+```
+pages/api/groups/pending-requests.ts
+```
+
+### ✅ 핵심 코드
+```ts
+const pendingRequests = await prisma.groupJoinRequest.findMany({
+  where: {
+    groupId: adminUser.groupId,
+    status: 'PENDING',
+  },
+  include: {
+    user: {
+      select: {
+        id: true,
+        email: true,
+      },
+    },
+  },
+});
+```
+
+- `groupId`가 관리자와 일치하고 `status === 'PENDING'`인 요청만 필터링
+- 요청한 유저의 이메일 정보도 함께 반환
+- 헤더로 `x-user-id`를 받아 관리자 인증을 수행
+
+---
+
+
+### ✅ 코드
+```ts
+const adminUser = await prisma.user.findUnique({
+  where: { id: userId },
+});
+
+if (!adminUser || adminUser.role !== 'ADMIN' || !adminUser.groupId) {
+  return res.status(403).json({ message: 'Not authorized' });
+}
+```
+
+- 로그인한 사용자가 관리자(`role: ADMIN`)인지 확인
+- 그룹에 소속되어 있는지도 확인
+
+---
+
+## 3️⃣ 테스트 흐름
+
+### ✅ Postman 요청 예시
+
+**GET** `http://localhost:3000/api/groups/pending-requests`
+
+**Headers:**
+```
+x-user-id: [관리자 유저 ID]
+```
+
+---
+
+## 📌 완료된 응답 예시
+
+```json
+{
+  "pendingRequests": [
+    {
+      "id": "...",
+      "user": {
+        "id": "...",
+        "email": "..."
+      },
+      "status": "PENDING"
+    }
+  ]
+}
+```
+
+---
+
+## 🧠 다음 구현 예정 기능
+
+- `PATCH /api/groups/approve/:id`: 승인 처리
+- `PATCH /api/groups/reject/:id`: 거절 처리
+- 승인 시 `User.groupId` 업데이트 + 상태 변경 처리
+- Flutter UI에서 승인 기능 표시 및 자동 이동 처리
+
+---
+
+이제 관리자 기능이 본격적으로 시작됨.  
+기능 흐름과 인증 구조가 명확하게 잡힌 하루였음! ✅
