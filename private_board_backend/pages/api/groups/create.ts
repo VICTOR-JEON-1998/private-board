@@ -1,24 +1,26 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../../lib/prisma.ts';
-import { nanoid } from 'nanoid'; // 초대코드 생성용
+import { prisma } from '../../../lib/prisma';
+import { nanoid } from 'nanoid';
+import { verifyToken } from '../../../lib/auth'; // 추가
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const { name } = req.body;
-  const userId = req.headers['x-user-id'];
+  const decoded = verifyToken(req, res);
+  if (!decoded) return; // 인증 실패 시 응답 종료
 
-  if (!name || typeof userId !== 'string') {
+  const userId = decoded.sub as string;
+
+  const { name } = req.body;
+  if (!name || !userId) {
     return res.status(400).json({ message: 'Missing group name or user ID' });
   }
 
   try {
-    // 초대코드 생성 (6자리 영문+숫자)
     const invitationCode = nanoid(6).toUpperCase();
 
-    // 그룹 생성
     const group = await prisma.group.create({
       data: {
         name,
@@ -27,7 +29,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
     });
 
-    // 그룹 생성자 = 관리자 + 자동 참여 처리
     await prisma.user.update({
       where: { id: userId },
       data: {

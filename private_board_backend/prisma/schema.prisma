@@ -84,6 +84,7 @@ model GroupJoinRequest {
   groupId   String
 
   status    JoinStatus @default(PENDING)
+  message   String? 
   createdAt DateTime   @default(now())
 }
 

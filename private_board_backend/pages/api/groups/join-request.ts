@@ -41,6 +41,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       data: {
         userId,
         groupId: group.id,
+        message,
       },
     });
 
