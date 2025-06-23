@@ -637,3 +637,70 @@ x-user-id: [관리자 유저 ID]
 
 이제 관리자 기능이 본격적으로 시작됨.  
 기능 흐름과 인증 구조가 명확하게 잡힌 하루였음! ✅
+
+
+# 🧠 Private Board - 인증 기반 그룹 생성 기능 구현 정리 (2025.06.23)
+
+## 📌 프로젝트 개요
+**Private Board (PB)**는 소규모 그룹(동아리, 가족, 친구 모임 등)이 따뜻한 분위기 속에서 글을 공유하고 소통할 수 있도록 돕는 커뮤니티 서비스입니다.  
+이 프로젝트는 **Flutter 프론트엔드**와 **Next.js API Routes 기반 백엔드**로 구성되어 있습니다.
+
+---
+
+## 🎯 오늘의 작업 목표
+- JWT 기반 인증 흐름 점검
+- 로그인 → 토큰 발급 → 인증된 API 호출 구현
+- Postman으로 테스트하여 백엔드 연결 확인
+
+---
+
+## 🔧 구현 내용 요약
+
+### ✅ 로그인 API 구현 (`/api/auth/login`)
+- 이메일 + 비밀번호로 사용자 인증
+- bcrypt로 비밀번호 비교
+- JWT 발급 (`sub` = userId)
+
+### ✅ JWT 인증 유틸 추가 (`lib/auth.ts`)
+- `verifyToken()` 함수로 Authorization 헤더에서 토큰 추출 및 검증
+
+### ✅ 그룹 생성 API 수정 (`/api/groups/create`)
+- 헤더의 JWT에서 userId 추출
+- 그룹 생성 + 해당 유저를 관리자(`ADMIN`)로 설정
+- 성공 시 `groupId`, `invitationCode` 반환
+
+---
+
+## 🔐 핵심 개념 요약
+
+### 1. JWT (JSON Web Token)
+- 사용자 인증 상태를 유지하기 위한 **토큰 기반 인증 방식**
+- 서버가 비밀번호 없이 사용자를 식별 가능
+- 구조: Header.Payload.Signature
+
+### 2. Authorization 헤더
+- API 요청 시 토큰을 포함하는 방식
+```
+Authorization: Bearer <your_token_here>
+```
+
+### 3. 인증 처리 흐름
+1. 로그인 → JWT 토큰 발급
+2. 클라이언트는 토큰을 `Authorization` 헤더에 담아 요청
+3. 백엔드는 토큰을 해석해 `userId` 등 유저 정보 추출
+
+---
+
+## 🧪 실습/복습 포인트
+
+| 실습 항목 | 확인 방법 |
+|-----------|-----------|
+| 로그인 → 토큰 발급 | `/api/auth/login` 호출 (Postman 또는 Flutter) |
+| 토큰으로 인증 요청 | `/api/groups/create` 호출 시 `Authorization` 헤더 사용 |
+| 토큰 해석 | `lib/auth.ts`의 `verifyToken()` 내부 로직 살펴보기 |
+| API 경로 점검 | 백엔드에서 API 경로 및 동작 방식 직접 따라가 보기 |
+
+---
+
+## ✅ 오늘 한 줄 요약
+> "JWT 기반 인증을 성공적으로 도입하고, 인증된 사용자만 그룹을 생성할 수 있도록 백엔드를 안전하게 구성함."
