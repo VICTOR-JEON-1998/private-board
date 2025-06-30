@@ -66,9 +66,4 @@ export default async function handler(req, res) {
     console.error('[REACTION_ERROR]', error)
     return res.status(500).json({ message: 'Internal server error' })
   }
-    const user = verifyToken(token);
-    console.log('[DEBUG] 사용자:', user);
-    if (!user) return res.status(401).json({ message: 'Unauthorized' });
-
-
 }
