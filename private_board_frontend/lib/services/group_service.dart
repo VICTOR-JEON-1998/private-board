@@ -8,7 +8,6 @@ class GroupService {
   // 🔹 그룹 생성 (JWT 토큰 기반 인증)
   Future<Map<String, dynamic>> createGroup({
     required String name,
-    required bool hasAdmin,
     required String token,
   }) async {
     try {
@@ -16,7 +15,6 @@ class GroupService {
         '/api/groups/create',
         data: {
           'name': name,
-          'hasAdmin': hasAdmin,
         },
         options: Options(
           headers: {
