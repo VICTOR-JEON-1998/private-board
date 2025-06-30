@@ -5,16 +5,25 @@ class GroupService {
 
   GroupService(this.dio);
 
-  // 🔹 그룹 생성
+  // 🔹 그룹 생성 (JWT 토큰 기반 인증)
   Future<Map<String, dynamic>> createGroup({
     required String name,
     required bool hasAdmin,
+    required String token,
   }) async {
     try {
-      final response = await dio.post('/api/groups/create', data: {
-        'name': name,
-        'hasAdmin': hasAdmin,
-      });
+      final response = await dio.post(
+        '/api/groups/create',
+        data: {
+          'name': name,
+          'hasAdmin': hasAdmin,
+        },
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
       return response.data;
     } catch (e) {
       throw Exception('그룹 생성 실패: $e');

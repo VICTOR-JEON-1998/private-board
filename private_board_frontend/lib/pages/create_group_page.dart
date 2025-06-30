@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/group_provider.dart';
+import '../providers/auth_provider.dart'; // ✅ 추가
 
 class CreateGroupPage extends ConsumerWidget {
   const CreateGroupPage({Key? key}) : super(key: key);
@@ -8,6 +9,7 @@ class CreateGroupPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final nameController = TextEditingController();
+    final auth = ref.watch(authProvider); // ✅ 기존 방식 유지
     bool hasAdmin = false;
 
     return Scaffold(
@@ -30,9 +32,12 @@ class CreateGroupPage extends ConsumerWidget {
             ),
             ElevatedButton(
               onPressed: () async {
-                final result = await ref
-                    .read(groupServiceProvider)
-                    .createGroup(name: nameController.text, hasAdmin: hasAdmin);
+                final result = await ref.read(groupServiceProvider).createGroup(
+                  name: nameController.text,
+                  hasAdmin: hasAdmin,
+                  token: auth.token, // ✅ 여기서 기존 구조 사용
+                );
+
                 showDialog(
                   context: context,
                   builder: (_) => AlertDialog(
