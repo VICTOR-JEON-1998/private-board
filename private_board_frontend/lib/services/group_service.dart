@@ -116,4 +116,19 @@ class GroupService {
       throw Exception('대기 요청 조회 실패: $e');
     }
   }
+
+  // 🔹 특정 사용자의 그룹 목록 조회
+  Future<List<dynamic>> getGroups({
+    required String userId,
+  }) async {
+    try {
+      final response = await dio.get(
+        '/api/groups',
+        queryParameters: {'userId': userId},
+      );
+      return List<dynamic>.from(response.data['groups'] ?? []);
+    } catch (e) {
+      throw Exception('그룹 목록 조회 실패: $e');
+    }
+  }
 }
