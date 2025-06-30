@@ -6,7 +6,11 @@ import '../services/auth_service.dart';
 import '../pages/login_page.dart';
 
 class PostListPage extends StatefulWidget {
-  const PostListPage({super.key});
+  final String groupId;
+  final String? invitationCode;
+
+  const PostListPage({Key? key, required this.groupId, this.invitationCode})
+      : super(key: key);
 
   @override
   State<PostListPage> createState() => _PostListPageState();
@@ -20,6 +24,11 @@ class _PostListPageState extends State<PostListPage> {
   void initState() {
     super.initState();
     _initPage();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.invitationCode != null) {
+        _showInvitationDialog(widget.invitationCode!);
+      }
+    });
   }
 
   Future<void> _initPage() async {
@@ -40,7 +49,7 @@ class _PostListPageState extends State<PostListPage> {
 
   Future<void> loadPosts() async {
     print('[PostListPage] loadPosts 호출');
-    final data = await PostApi.fetchPosts();
+    final data = await PostApi.fetchGroupPosts(widget.groupId);
     print('[PostListPage] 받아온 글 개수: ${data.length}');
     setState(() {
       posts = data;
@@ -57,6 +66,22 @@ class _PostListPageState extends State<PostListPage> {
     );
   }
 
+  void _showInvitationDialog(String code) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('초대 코드'),
+        content: SelectableText(code),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('확인'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     print('[PostListPage] build 호출, posts 길이: ${posts.length}, loading: $_loading');
@@ -65,6 +90,12 @@ class _PostListPageState extends State<PostListPage> {
       appBar: AppBar(
         title: const Text('🌿 따뜻한 하루'),
         actions: [
+          if (widget.invitationCode != null)
+            IconButton(
+              icon: const Icon(Icons.admin_panel_settings),
+              tooltip: '초대 코드',
+              onPressed: () => _showInvitationDialog(widget.invitationCode!),
+            ),
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: "로그아웃",

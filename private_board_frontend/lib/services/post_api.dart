@@ -38,6 +38,28 @@ class PostApi {
     }
   }
 
+  /// 🔍 특정 그룹의 게시글 목록 조회
+  static Future<List<dynamic>> fetchGroupPosts(String groupId) async {
+    final token = await _getToken();
+    final url = '$_baseUrl/api/groups/$groupId/posts';
+    try {
+      final response = await _dio.get(
+        url,
+        options: Options(
+          headers: {
+            if (token != null) 'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      return response.data;
+    } catch (e, stack) {
+      print('❌ 그룹 게시글 조회 실패: $e');
+      print('스택 트레이스: $stack');
+      return [];
+    }
+  }
+
   /// ✍️ 게시글 등록
   static Future<bool> create(String title, String content) async {
     final token = await _getToken();

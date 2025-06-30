@@ -2,15 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/group_provider.dart';
 import '../providers/auth_provider.dart';
+import 'post_list_page.dart';
 
-class CreateGroupPage extends ConsumerWidget {
+class CreateGroupPage extends ConsumerStatefulWidget {
   const CreateGroupPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final nameController = TextEditingController();
+  ConsumerState<CreateGroupPage> createState() => _CreateGroupPageState();
+}
+
+class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
+  final nameController = TextEditingController();
+  bool hasAdmin = false;
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final token = ref.watch(tokenProvider);
-    bool hasAdmin = false;
 
     return Scaffold(
       appBar: AppBar(title: Text('그룹 생성')),
@@ -24,10 +37,12 @@ class CreateGroupPage extends ConsumerWidget {
                 Checkbox(
                   value: hasAdmin,
                   onChanged: (value) {
-                    hasAdmin = value ?? false;
+                    setState(() {
+                      hasAdmin = value ?? false;
+                    });
                   },
                 ),
-                Text('관리자 있음'),
+                const Text('관리자 있음'),
               ],
             ),
             ElevatedButton(
@@ -38,12 +53,20 @@ class CreateGroupPage extends ConsumerWidget {
                   token: token,
                 );
 
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    content: Text('초대코드: ${result['invitationCode']}'),
-                  ),
-                );
+                final groupId = result['groupId'] as String?;
+                final code = result['invitationCode'] as String?;
+
+                if (groupId != null) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PostListPage(
+                        groupId: groupId,
+                        invitationCode: hasAdmin ? code : null,
+                      ),
+                    ),
+                  );
+                }
               },
               child: Text('생성'),
             ),
