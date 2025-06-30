@@ -45,26 +45,6 @@ class GroupService {
     }
   }
 
-  // ✅ 그룹 참여 요청 (승인 대기)
-  Future<Map<String, dynamic>> sendJoinRequest({
-    required String groupId,
-    required String userId,
-    required String message,
-  }) async {
-    try {
-      final response = await dio.post(
-        '/api/groups/join-request',
-        data: {
-          'groupId': groupId,
-          'userId': userId,
-          'message': message,
-        },
-      );
-      return response.data;
-    } catch (e) {
-      throw Exception('참여 요청 실패: $e');
-    }
-  }
 
   // ✅ 대기 요청 승인
   Future<Map<String, dynamic>> approveJoinRequest({
