@@ -10,7 +10,6 @@ class CreateGroupPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final nameController = TextEditingController();
     final token = ref.watch(tokenProvider);
-    bool hasAdmin = false;
 
     return Scaffold(
       appBar: AppBar(title: Text('그룹 생성')),
@@ -19,22 +18,10 @@ class CreateGroupPage extends ConsumerWidget {
         child: Column(
           children: [
             TextField(controller: nameController, decoration: InputDecoration(labelText: '그룹 이름')),
-            Row(
-              children: [
-                Checkbox(
-                  value: hasAdmin,
-                  onChanged: (value) {
-                    hasAdmin = value ?? false;
-                  },
-                ),
-                Text('관리자 있음'),
-              ],
-            ),
             ElevatedButton(
               onPressed: () async {
                 final result = await ref.read(groupServiceProvider).createGroup(
                   name: nameController.text,
-                  hasAdmin: hasAdmin,
                   token: token,
                 );
 
