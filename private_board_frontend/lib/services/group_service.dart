@@ -25,6 +25,9 @@ class GroupService {
         ),
       );
       return response.data;
+    } on DioError catch (e) {
+      final message = e.response?.data['message'] ?? e.message;
+      throw Exception(message);
     } catch (e) {
       throw Exception('그룹 생성 실패: $e');
     }
