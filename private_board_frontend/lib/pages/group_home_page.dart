@@ -41,9 +41,10 @@ class _GroupHomePageState extends ConsumerState<GroupHomePage> {
       appBar: AppBar(title: const Text('그룹 목록')),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : Column(
+          : Row(
               children: [
                 Expanded(
+                  flex: 2,
                   child: groups.isEmpty
                       ? const Center(child: Text('참여한 그룹이 없습니다.'))
                       : ListView.builder(
@@ -56,9 +57,8 @@ class _GroupHomePageState extends ConsumerState<GroupHomePage> {
                           },
                         ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: Row(
+                Expanded(
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       ElevatedButton(
@@ -70,7 +70,7 @@ class _GroupHomePageState extends ConsumerState<GroupHomePage> {
                         },
                         child: const Text('그룹 생성'),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(height: 12),
                       ElevatedButton(
                         onPressed: () {
                           Navigator.push(

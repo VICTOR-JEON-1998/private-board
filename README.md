@@ -704,3 +704,14 @@ Authorization: Bearer <your_token_here>
 
 ## ✅ 오늘 한 줄 요약
 > "JWT 기반 인증을 성공적으로 도입하고, 인증된 사용자만 그룹을 생성할 수 있도록 백엔드를 안전하게 구성함."
+
+### Environment configuration
+Frontend services now read the API base URL from a compile-time
+`API_BASE_URL` constant. When building the Flutter app you can override
+this value with:
+
+```
+flutter run --dart-define=API_BASE_URL=https://your-api.com
+```
+
+If omitted, it defaults to `http://localhost:3000`.

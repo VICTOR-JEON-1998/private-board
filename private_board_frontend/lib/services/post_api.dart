@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart'; // Navigator 등 context 필요 시
+import '../config.dart';
+import '../models/post.dart';
 
 class PostApi {
-  static const _baseUrl = 'http://localhost:3000';
+  static const _baseUrl = apiBaseUrl;
   static final Dio _dio = Dio();
 
   // 토큰 불러오기
@@ -58,6 +60,11 @@ class PostApi {
       print('❌ 글 등록 요청 실패: $e');
       return false;
     }
+  }
+
+  /// WritePage 호환용 메서드
+  static Future<bool> createPost(Post post) {
+    return create(post.title, post.content);
   }
 
   /// 게시글 수정

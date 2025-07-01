@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/group_provider.dart';
+import 'post_list_page.dart';
 
 class JoinGroupPage extends ConsumerStatefulWidget {
   final String userId;
@@ -43,7 +44,7 @@ class _JoinGroupPageState extends ConsumerState<JoinGroupPage> {
                     invitationCode: codeController.text,
                     userId: widget.userId,
                   );
-                  showDialog(
+                  await showDialog(
                     context: context,
                     builder: (_) => AlertDialog(
                       title: Text('참여 완료'),
@@ -56,6 +57,12 @@ class _JoinGroupPageState extends ConsumerState<JoinGroupPage> {
                       ],
                     ),
                   );
+                  if (context.mounted) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const PostListPage()),
+                    );
+                  }
                 } catch (e) {
                   print(e);
                 }

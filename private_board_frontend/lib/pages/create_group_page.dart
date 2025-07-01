@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/group_provider.dart';
 import '../providers/auth_provider.dart';
+import 'post_list_page.dart';
 
 class CreateGroupPage extends ConsumerWidget {
   const CreateGroupPage({Key? key}) : super(key: key);
@@ -25,14 +26,21 @@ class CreateGroupPage extends ConsumerWidget {
                   token: token,
                 );
 
-                showDialog(
+                await showDialog(
                   context: context,
                   builder: (_) => AlertDialog(
                     content: Text('초대코드: ${result['invitationCode']}'),
                   ),
                 );
+
+                if (context.mounted) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const PostListPage()),
+                  );
+                }
               },
-              child: Text('생성'),
+              child: const Text('생성'),
             ),
           ],
         ),

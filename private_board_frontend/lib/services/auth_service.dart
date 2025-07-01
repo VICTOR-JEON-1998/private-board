@@ -1,8 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../config.dart';
 
 class AuthService {
-  static const _baseUrl = 'http://localhost:3000';
+  static const _baseUrl = apiBaseUrl;
 
   /// 🔐 회원가입
   static Future<String> register(String email, String password) async {
