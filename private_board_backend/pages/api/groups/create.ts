@@ -1,7 +1,8 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from '../../../lib/prisma';
-import { nanoid } from 'nanoid';
-import { verifyToken } from '../../../lib/auth'; // 추가
+import { NextApiRequest, NextApiResponse } from 'next'
+import { prisma } from '../../../lib/prisma'
+import { nanoid } from 'nanoid'
+import bcrypt from 'bcryptjs'
+import { verifyToken } from '../../../lib/auth'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -13,17 +14,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const userId = decoded.sub as string;
 
-  const { name } = req.body;
-  if (!name || !userId) {
-    return res.status(400).json({ message: 'Missing group name or user ID' });
+  const { name, loginId, password } = req.body
+  if (!name || !loginId || !password || !userId) {
+    return res.status(400).json({ message: 'Missing parameters' })
+  }
+
+  const existing = await prisma.group.findUnique({ where: { loginId } })
+  if (existing) {
+    return res.status(409).json({ message: 'Duplicate groupId' })
   }
 
   try {
     const invitationCode = nanoid(6).toUpperCase();
+    const hashedPassword = await bcrypt.hash(password, 10)
 
     const group = await prisma.group.create({
       data: {
         name,
+        loginId,
+        password: hashedPassword,
         invitationCode,
         hasAdmin: true,
       },

@@ -25,7 +25,10 @@ class _JoinGroupPageState extends ConsumerState<JoinGroupPage> {
   Widget build(BuildContext context) {
     // 예시 UI 코드
     return Scaffold(
-      appBar: AppBar(title: Text('그룹 참여')),
+      appBar: AppBar(
+        title: const Text('그룹 참여'),
+        leading: Navigator.canPop(context) ? const BackButton() : null,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

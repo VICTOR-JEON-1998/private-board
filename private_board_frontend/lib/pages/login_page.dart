@@ -45,7 +45,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('🔐 로그인')),
+      appBar: AppBar(
+        title: const Text('🔐 로그인'),
+        leading: Navigator.canPop(context) ? const BackButton() : null,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

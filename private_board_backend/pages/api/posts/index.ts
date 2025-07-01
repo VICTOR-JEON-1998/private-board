@@ -22,8 +22,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ message: 'Invalid token' })
     }
 
-    const { title, content } = req.body
-    if (!title || !content) return res.status(400).json({ message: 'Missing fields' })
+  const { title, content, groupId } = req.body
+    if (!title || !content || !groupId) {
+      return res.status(400).json({ message: 'Missing fields' })
+    }
 
     try {
       const post = await prisma.post.create({
@@ -31,6 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           title,
           content,
           authorId: userId,
+          groupId,
         }
       })
 
@@ -42,13 +45,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   // ✅ GET /api/posts
   if (req.method === 'GET') {
+    const { groupId } = req.query
     try {
       const posts = await prisma.post.findMany({
+        where: groupId ? { groupId: String(groupId) } : undefined,
         orderBy: { createdAt: 'desc' },
         include: {
           author: {
             select: {
-              id: true,       // ✅ 추가!
+              id: true,
               email: true,
             },
           },
