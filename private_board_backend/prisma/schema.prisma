@@ -27,6 +27,8 @@ model User {
 
 model Group {
   id             String   @id @default(uuid())
+  loginId        String   @unique
+  password       String
   name           String
   invitationCode String   @unique
   hasAdmin       Boolean  @default(false)

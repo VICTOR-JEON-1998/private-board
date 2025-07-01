@@ -9,7 +9,10 @@ class CreateGroupPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final nameController = TextEditingController();
+    final idController = TextEditingController();
+    final pwController = TextEditingController();
     final token = ref.watch(tokenProvider);
+    bool idAvailable = false;
 
     return Scaffold(
       appBar: AppBar(title: Text('그룹 생성')),
@@ -17,22 +20,65 @@ class CreateGroupPage extends ConsumerWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(controller: nameController, decoration: InputDecoration(labelText: '그룹 이름')),
+            TextField(controller: nameController, decoration: const InputDecoration(labelText: '그룹 이름')),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: idController,
+                    decoration: const InputDecoration(labelText: '그룹 ID'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: () async {
+                    final available = await ref.read(groupServiceProvider).checkGroupId(idController.text);
+                    idAvailable = available;
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(available ? '사용 가능한 ID입니다.' : '이미 존재하는 ID입니다.')),
+                      );
+                    }
+                  },
+                  child: const Text('중복 확인'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: pwController,
+              obscureText: true,
+              decoration: const InputDecoration(labelText: '그룹 비밀번호'),
+            ),
             ElevatedButton(
               onPressed: () async {
                 final result = await ref.read(groupServiceProvider).createGroup(
                   name: nameController.text,
+                  groupId: idController.text,
+                  password: pwController.text,
                   token: token,
                 );
 
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    content: Text('초대코드: ${result['invitationCode']}'),
-                  ),
-                );
+                if (result['status'] == 'conflict') {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('이미 존재하는 그룹 ID입니다.')),
+                    );
+                  }
+                  return;
+                }
+
+                if (context.mounted) {
+                  showDialog(
+                    context: context,
+                    builder: (_) => AlertDialog(
+                      content: Text('초대코드: ${result['invitationCode']}'),
+                    ),
+                  );
+                }
               },
-              child: Text('생성'),
+              child: const Text('생성'),
             ),
           ],
         ),
