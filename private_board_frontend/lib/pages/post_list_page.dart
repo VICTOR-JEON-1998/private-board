@@ -6,7 +6,8 @@ import '../services/auth_service.dart';
 import '../pages/login_page.dart';
 
 class PostListPage extends StatefulWidget {
-  const PostListPage({super.key});
+  final String groupId;
+  const PostListPage({super.key, required this.groupId});
 
   @override
   State<PostListPage> createState() => _PostListPageState();
@@ -40,7 +41,7 @@ class _PostListPageState extends State<PostListPage> {
 
   Future<void> loadPosts() async {
     print('[PostListPage] loadPosts 호출');
-    final data = await PostApi.fetchPosts();
+    final data = await PostApi.fetchPosts(groupId: widget.groupId);
     print('[PostListPage] 받아온 글 개수: ${data.length}');
     setState(() {
       posts = data;
@@ -64,6 +65,7 @@ class _PostListPageState extends State<PostListPage> {
       backgroundColor: const Color(0xFFFFFBF2),
       appBar: AppBar(
         title: const Text('🌿 따뜻한 하루'),
+        leading: Navigator.canPop(context) ? const BackButton() : null,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -123,7 +125,7 @@ class _PostListPageState extends State<PostListPage> {
         onPressed: () async {
           final result = await Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const CreatePostPage()),
+            MaterialPageRoute(builder: (_) => CreatePostPage(groupId: widget.groupId)),
           );
           if (result == true) {
             await loadPosts(); // 글쓰기 성공 시 목록 새로고침

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import '../services/post_api.dart';
 
 class CreatePostPage extends StatefulWidget {
-  const CreatePostPage({super.key});
+  final String groupId;
+  const CreatePostPage({super.key, required this.groupId});
 
   @override
   State<CreatePostPage> createState() => _CreatePostPageState();
@@ -25,7 +26,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
     }
 
     setState(() => isSubmitting = true);
-    final success = await PostApi.create(title, content);
+    final success = await PostApi.create(title, content, widget.groupId);
     setState(() => isSubmitting = false);
 
     if (success && mounted) {
@@ -46,6 +47,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
         title: const Text('✍️ 글쓰기'),
         backgroundColor: Colors.orange[200],
         centerTitle: true,
+        leading: Navigator.canPop(context) ? const BackButton() : null,
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),

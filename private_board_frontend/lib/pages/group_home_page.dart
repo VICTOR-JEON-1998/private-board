@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/group_provider.dart';
 import 'create_group_page.dart';
 import 'join_group_page.dart';
+import 'post_list_page.dart';
 
 class GroupHomePage extends ConsumerStatefulWidget {
   final String userId;
@@ -38,7 +39,10 @@ class _GroupHomePageState extends ConsumerState<GroupHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('그룹 목록')),
+      appBar: AppBar(
+        title: const Text('그룹 목록'),
+        leading: Navigator.canPop(context) ? const BackButton() : null,
+      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : Column(
@@ -52,6 +56,14 @@ class _GroupHomePageState extends ConsumerState<GroupHomePage> {
                             final group = groups[index];
                             return ListTile(
                               title: Text(group['name'] ?? ''),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => PostListPage(groupId: group['id']),
+                                  ),
+                                );
+                              },
                             );
                           },
                         ),
