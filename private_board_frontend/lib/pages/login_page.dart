@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/auth_service.dart';
-import '../pages/group_home_page.dart';
+import 'welcome_page.dart';
 import '../providers/auth_provider.dart';
 import 'register_page.dart';
 
@@ -25,15 +25,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (response != null && mounted) {
       final token = response['token'];
       final userId = response['user']['id'];
+      final email = response['user']['email'];
 
       // 전역 상태에 저장
       ref.read(tokenProvider.notifier).state = token;
       ref.read(userIdProvider.notifier).state = userId;
+      ref.read(userEmailProvider.notifier).state = email;
 
       // 그룹 선택 페이지로 이동
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => GroupHomePage(userId: userId)),
+        MaterialPageRoute(
+          builder: (_) => WelcomePage(userId: userId, email: email),
+        ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -45,7 +49,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('🔐 로그인')),
+      appBar: AppBar(
+        title: const Text('🔐 로그인'),
+        leading: Navigator.canPop(context) ? const BackButton() : null,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "Group" ADD COLUMN "loginId" TEXT NOT NULL DEFAULT '';
+ALTER TABLE "Group" ADD COLUMN "password" TEXT NOT NULL DEFAULT '';
+CREATE UNIQUE INDEX "Group_loginId_key" ON "Group"("loginId");
+ALTER TABLE "Group" ALTER COLUMN "loginId" DROP DEFAULT;
+ALTER TABLE "Group" ALTER COLUMN "password" DROP DEFAULT;
