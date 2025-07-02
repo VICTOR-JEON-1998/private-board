@@ -478,9 +478,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
 - API: `POST /api/groups/create`
 - 요청 시:
-  - `name` 필수
-  - `x-user-id` 헤더 필요
+  - `name`, `loginId`, `password` 필수
+  - `Authorization` 헤더에 JWT 필요
 - 처리 로직:
+  - `loginId` 중복 여부 확인 후 해시된 `password` 저장
   - 초대코드 자동 생성 (nanoid)
   - 생성자는 자동으로 `ADMIN` 역할로 그룹에 소속됨
 - 응답:
