@@ -13,11 +13,13 @@ class JoinGroupPage extends ConsumerStatefulWidget {
 
 class _JoinGroupPageState extends ConsumerState<JoinGroupPage> {
 
-  final codeController = TextEditingController();
+  final idController = TextEditingController();
+  final pwController = TextEditingController();
 
   @override
   void dispose() {
-    codeController.dispose();
+    idController.dispose();
+    pwController.dispose();
     super.dispose();
   }
 
@@ -25,42 +27,54 @@ class _JoinGroupPageState extends ConsumerState<JoinGroupPage> {
   Widget build(BuildContext context) {
     // 예시 UI 코드
     return Scaffold(
-      appBar: AppBar(title: Text('그룹 참여')),
+      appBar: AppBar(
+        title: const Text('그룹 참여'),
+        leading: Navigator.canPop(context) ? const BackButton() : null,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
-              controller: codeController,
-              decoration: InputDecoration(labelText: '초대 코드 입력'),
+              controller: idController,
+              decoration: const InputDecoration(labelText: '그룹 ID'),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 12),
+            TextField(
+              controller: pwController,
+              obscureText: true,
+              decoration: const InputDecoration(labelText: '비밀번호'),
+            ),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
                 final groupService = ref.read(groupServiceProvider);
                 try {
-                  final result = await groupService.joinGroup(
-                    invitationCode: codeController.text,
+                  final result = await groupService.joinGroupByCredential(
+                    groupId: idController.text,
+                    password: pwController.text,
                     userId: widget.userId,
                   );
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: Text('참여 완료'),
-                      content: Text(result['message'] ?? '그룹에 참여했습니다.'),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text('확인'),
-                        ),
-                      ],
-                    ),
-                  );
+                  if (context.mounted) {
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: const Text('참여 완료'),
+                        content: Text(result['message'] ?? '그룹에 참여했습니다.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('확인'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
                 } catch (e) {
                   print(e);
                 }
               },
-              child: Text('그룹 참여'),
+              child: const Text('그룹 참여'),
             ),
           ],
         ),

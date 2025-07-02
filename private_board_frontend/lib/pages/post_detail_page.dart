@@ -146,6 +146,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
         title: const Text('📖 게시글 상세'),
         backgroundColor: Colors.orange[200],
         centerTitle: true,
+        leading: Navigator.canPop(context) ? const BackButton() : null,
         actions: isOwner
             ? [
           IconButton(

@@ -50,6 +50,7 @@ class _RegisterPageState extends State<RegisterPage> {
         backgroundColor: Colors.orange[200],
         title: const Text('🧡 따뜻한 회원가입'),
         centerTitle: true,
+        leading: Navigator.canPop(context) ? const BackButton() : null,
       ),
       body: Padding(
         padding: const EdgeInsets.all(24),
