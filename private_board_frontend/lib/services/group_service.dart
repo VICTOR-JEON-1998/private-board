@@ -8,7 +8,8 @@ class GroupService {
   // 🔹 그룹 생성 (JWT 토큰 기반 인증)
   Future<Map<String, dynamic>> createGroup({
     required String name,
-    required bool hasAdmin,
+    required String groupId,
+    required String password,
     required String token,
   }) async {
     try {
@@ -16,7 +17,8 @@ class GroupService {
         '/api/groups/create',
         data: {
           'name': name,
-          'hasAdmin': hasAdmin,
+          'loginId': groupId,
+          'password': password,
         },
         options: Options(
           headers: {
@@ -24,9 +26,28 @@ class GroupService {
           },
         ),
       );
-      return response.data;
-    } catch (e) {
+
+      return {
+        'status': response.statusCode == 201 ? 'success' : 'error',
+        ...response.data,
+      };
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 409) {
+        return {'status': 'conflict'};
+      }
       throw Exception('그룹 생성 실패: $e');
+    }
+  }
+
+  Future<bool> checkGroupId(String groupId) async {
+    try {
+      final response = await dio.get(
+        '/api/groups/check-id',
+        queryParameters: {'loginId': groupId},
+      );
+      return response.data['available'] as bool;
+    } catch (e) {
+      throw Exception('중복 확인 실패: $e');
     }
   }
 
@@ -47,26 +68,27 @@ class GroupService {
     }
   }
 
-  // ✅ 그룹 참여 요청 (승인 대기)
-  Future<Map<String, dynamic>> sendJoinRequest({
+  /// 로그인 ID와 비밀번호로 그룹 참여
+  Future<Map<String, dynamic>> joinGroupByCredential({
     required String groupId,
+    required String password,
     required String userId,
-    required String message,
   }) async {
     try {
       final response = await dio.post(
-        '/api/groups/join-request',
-        data: {
-          'groupId': groupId,
-          'userId': userId,
-          'message': message,
-        },
+        '/api/groups/login',
+        data: {'loginId': groupId, 'password': password},
+        options: Options(headers: {'x-user-id': userId}),
       );
-      return response.data;
-    } catch (e) {
-      throw Exception('참여 요청 실패: $e');
+      return response.data as Map<String, dynamic>;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        return {'message': 'Invalid password'};
+      }
+      throw Exception('그룹 참여 실패: $e');
     }
   }
+
 
   // ✅ 대기 요청 승인
   Future<Map<String, dynamic>> approveJoinRequest({
@@ -114,6 +136,21 @@ class GroupService {
       return response.data['pendingRequests'];
     } catch (e) {
       throw Exception('대기 요청 조회 실패: $e');
+    }
+  }
+
+  // 🔹 특정 사용자의 그룹 목록 조회
+  Future<List<dynamic>> getGroups({
+    required String userId,
+  }) async {
+    try {
+      final response = await dio.get(
+        '/api/groups',
+        queryParameters: {'userId': userId},
+      );
+      return List<dynamic>.from(response.data['groups'] ?? []);
+    } catch (e) {
+      throw Exception('그룹 목록 조회 실패: $e');
     }
   }
 }

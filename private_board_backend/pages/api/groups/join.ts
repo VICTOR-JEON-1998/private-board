@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { prisma } from 'private_board_backend/prisma'; // 경로 수정됨
+import { prisma } from '@/lib/prisma';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(404).json({ message: '초대코드가 유효하지 않습니다.' });
   }
 
-  const user = await prisma.user.update({
+  await prisma.user.update({
     where: { id: String(userId) },
     data: { groupId: group.id },
   });

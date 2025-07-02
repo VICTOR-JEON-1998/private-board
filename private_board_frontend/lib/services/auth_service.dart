@@ -43,11 +43,13 @@ class AuthService {
 
       final token = response.data['accessToken'] ?? response.data['token'];
       final userId = response.data['user']?['id'];
+      final userEmail = response.data['user']?['email'];
 
-      if (token != null && userId != null) {
+      if (token != null && userId != null && userEmail != null) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('accessToken', token);
         await prefs.setString('userId', userId);
+        await prefs.setString('userEmail', userEmail);
         return response.data; // 전체 response 반환
       }
     } catch (e) {
@@ -68,11 +70,18 @@ class AuthService {
     return prefs.getString('userId');
   }
 
+  /// 현재 저장된 유저 이메일 가져오기
+  static Future<String?> getUserEmail() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('userEmail');
+  }
+
   /// 로그아웃 (토큰 + 유저ID 삭제)
   static Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('accessToken');
     await prefs.remove('userId');
+    await prefs.remove('userEmail');
   }
 
   /// (선택) 토큰 유효성 검사 예시 (추가로 활용 가능)

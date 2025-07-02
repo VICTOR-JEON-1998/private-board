@@ -13,7 +13,7 @@ class PostApi {
   }
 
   /// 🔍 게시글 목록 조회 (토큰 인증 포함 + 상세 로그)
-  static Future<List<dynamic>> fetchPosts() async {
+  static Future<List<dynamic>> fetchPosts({String? groupId}) async {
     final token = await _getToken();
     print('글목록 fetchPosts() 시 토큰: $token');
 
@@ -21,6 +21,7 @@ class PostApi {
     try {
       final response = await _dio.get(
         url,
+        queryParameters: groupId != null ? {'groupId': groupId} : null,
         options: Options(
           headers: {
             if (token != null) 'Authorization': 'Bearer $token',
@@ -39,7 +40,7 @@ class PostApi {
   }
 
   /// ✍️ 게시글 등록
-  static Future<bool> create(String title, String content) async {
+  static Future<bool> create(String title, String content, String groupId) async {
     final token = await _getToken();
     if (token == null) {
       print('❌ 로그인 토큰 없음: 글 작성 불가');
@@ -48,7 +49,7 @@ class PostApi {
     try {
       final response = await _dio.post(
         '$_baseUrl/api/posts',
-        data: {'title': title, 'content': content},
+        data: {'title': title, 'content': content, 'groupId': groupId},
         options: Options(
           headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'},
         ),
