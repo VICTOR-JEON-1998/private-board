@@ -52,25 +52,50 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: () async {
-                    final available = await ref.read(groupServiceProvider).checkGroupId(idController.text);
-                    setState(() {
-                      idChecked = true;
-                      idAvailable = available;
-                    });
-                    if (context.mounted) {
-                      ScaffoldMessenger.of(context)
-                        ..hideCurrentMaterialBanner()
-                        ..showMaterialBanner(
-                          MaterialBanner(
-                            content: Text(available ? '사용 가능한 ID입니다.' : '이미 존재하는 ID입니다.'),
-                            actions: [
-                              TextButton(
-                                onPressed: () => ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
-                                child: const Text('닫기'),
-                              )
-                            ],
-                          ),
-                        );
+                    if (idController.text.trim().isEmpty) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(content: Text('그룹 ID를 입력해주세요.')));
+                      }
+                      return;
+                    }
+                    try {
+                      final available = await ref
+                          .read(groupServiceProvider)
+                          .checkGroupId(idController.text);
+                      setState(() {
+                        idChecked = true;
+                        idAvailable = available;
+                      });
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context)
+                          ..hideCurrentMaterialBanner()
+                          ..showMaterialBanner(
+                            MaterialBanner(
+                              content: Text(available
+                                  ? '사용 가능한 ID입니다.'
+                                  : '이미 존재하는 ID입니다.'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      ScaffoldMessenger.of(context)
+                                          .hideCurrentMaterialBanner(),
+                                  child: const Text('닫기'),
+                                )
+                              ],
+                            ),
+                          );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context)
+                          ..hideCurrentSnackBar()
+                          ..showSnackBar(
+                            const SnackBar(
+                                content:
+                                    Text('ID 중복 확인 중 오류가 발생했습니다.')),
+                          );
+                      }
                     }
                   },
                   child: const Text('중복 확인'),
