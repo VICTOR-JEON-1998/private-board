@@ -6,7 +6,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const { invitationCode } = req.body;
+  const { invitationCode, message } = req.body;
   const userId = req.headers['x-user-id'];
 
   if (!invitationCode || typeof userId !== 'string') {
