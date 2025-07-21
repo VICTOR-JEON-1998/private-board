@@ -43,7 +43,7 @@ class GroupService {
     try {
       final response = await dio.get(
         '/api/groups/check-id',
-        queryParameters: {'loginId': groupId},
+        queryParameters: {'groupId': groupId},
       );
       return response.data['available'] as bool;
     } catch (e) {
