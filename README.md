@@ -756,3 +756,96 @@ Authorization: Bearer <your_token_here>
 | 회원가입 시 비밀번호 이중 입력 | 비밀번호 입력을 2번 받고 일치 여부 검증 추가 필요 |
 
 ---
+
+# 📆 2025-07-22 작업 일지: 그룹 내 글 작성 안됨 문제 해결
+
+## 🧨 문제 현상
+- 글 목록은 정상적으로 불러와졌지만,
+- 그룹에서 글을 쓰려고 하면 **500 Internal Server Error** 발생
+- 콘솔에서는 다음과 같은 에러 출력됨:
+
+```
+Invalid `prisma.user.findUnique()` invocation:
+Argument `where` of type UserWhereUniqueInput needs at least one of `id` or `email` arguments.
+```
+
+---
+
+## 🔍 원인 분석 과정
+
+### ✅ 1. 토큰은 정상 발급 & 전달됨
+- 로그인 시 백엔드 응답:
+
+```json
+{
+  token: "eyJhbGciOi... (생략)",
+  user: {
+    id: "8127dd56-...",
+    email: "0721"
+  }
+}
+```
+
+- Flutter `PostApi.create()` 호출 시에도 `Bearer {token}`으로 헤더에 실려서 백엔드에 잘 전달됨
+
+---
+
+### ✅ 2. 백엔드에서의 오류 발생 위치
+
+```ts
+const decoded = jwt.verify(token, JWT_SECRET) as { userId: string }
+const user = await prisma.user.findUnique({
+  where: { id: userId }, // ❌ userId가 undefined였음
+})
+```
+
+### ❗ 문제의 핵심
+- JWT에는 `sub` 필드에 유저 ID가 들어감
+- 하지만 코드에서는 `decoded.userId`로 접근하고 있었음
+- 따라서 `userId`는 `undefined`가 되어 Prisma가 에러 발생시킴
+
+---
+
+## 🛠️ 해결 방법
+
+### `/pages/api/posts/index.ts` 수정 전
+
+```ts
+const decoded = jwt.verify(token, JWT_SECRET) as { userId: string }
+userId = decoded.userId
+```
+
+### ✅ 수정 후
+
+```ts
+const decoded = jwt.verify(token, JWT_SECRET) as jwt.JwtPayload
+userId = decoded.sub  // 👈 진짜 유저 ID는 sub에 있음!
+```
+
+---
+
+## ✅ 수정 완료 후 결과
+
+- 그룹 ID와 토큰 모두 정상 전달됨
+- 유저 ID가 제대로 추출되면서 `prisma.post.create()` 정상 실행
+- **그룹 내 글 작성이 완전히 정상화됨!**
+
+---
+
+## 🔁 작업 중간 확인한 것들
+
+- 토큰 발급 구조 및 JWT Payload 구조
+- Flutter에서 토큰이 어떻게 전달되는지
+- 백엔드에서 사용자 검증 로직
+- Prisma Client의 `findUnique()` 사용 조건
+- Flutter에서 그룹 ID와 토큰을 함께 보내는 흐름
+
+---
+
+## 🧠 오늘의 교훈
+
+| 교훈 | 설명 |
+|------|------|
+| JWT 구조 이해는 필수 | `sub` 필드가 유저 ID일 확률이 높음 (RFC 7519 표준 구조) |
+| Prisma 오류 메시지를 주의 깊게 읽자 | `id: undefined` 같은 힌트가 디버깅에 결정적 |
+| 인증 기반 API에서는 `토큰 → 유저 ID → 권한 확인` 흐름이 중요 | 클라이언트에서 토큰 잘 보내더라도 백엔드에서 검증 실패하면 작동 안 함 |
