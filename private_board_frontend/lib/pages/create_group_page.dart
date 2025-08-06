@@ -39,7 +39,10 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(controller: nameController, decoration: const InputDecoration(labelText: '그룹 이름')),
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(labelText: '그룹 이름'),
+            ),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -54,11 +57,13 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
                   onPressed: () async {
                     if (idController.text.trim().isEmpty) {
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(const SnackBar(content: Text('그룹 ID를 입력해주세요.')));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('그룹 ID를 입력해주세요.')),
+                        );
                       }
                       return;
                     }
+
                     try {
                       final available = await ref
                           .read(groupServiceProvider)
@@ -67,24 +72,25 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
                         idChecked = true;
                         idAvailable = available;
                       });
+
                       if (context.mounted) {
-                        ScaffoldMessenger.of(context)
-                          ..hideCurrentMaterialBanner()
-                          ..showMaterialBanner(
-                            MaterialBanner(
-                              content: Text(available
+                        final messenger = ScaffoldMessenger.of(context);
+                        messenger.clearMaterialBanners(); // 기존 배너 제거
+                        messenger.showMaterialBanner(
+                          MaterialBanner(
+                            content: Text(
+                              available
                                   ? '사용 가능한 ID입니다.'
-                                  : '이미 존재하는 ID입니다.'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () =>
-                                      ScaffoldMessenger.of(context)
-                                          .hideCurrentMaterialBanner(),
-                                  child: const Text('닫기'),
-                                )
-                              ],
+                                  : '이미 존재하는 ID입니다.',
                             ),
-                          );
+                            actions: [
+                              TextButton(
+                                onPressed: () => messenger.hideCurrentMaterialBanner(),
+                                child: const Text('닫기'),
+                              ),
+                            ],
+                          ),
+                        );
                       }
                     } catch (e) {
                       if (context.mounted) {
@@ -92,8 +98,7 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
                           ..hideCurrentSnackBar()
                           ..showSnackBar(
                             const SnackBar(
-                                content:
-                                Text('ID 중복 확인 중 오류가 발생했습니다.')),
+                                content: Text('ID 중복 확인 중 오류가 발생했습니다.')),
                           );
                       }
                     }
@@ -108,6 +113,7 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
               obscureText: true,
               decoration: const InputDecoration(labelText: '그룹 비밀번호'),
             ),
+            const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () async {
                 if (!idChecked || idAvailable != true) {
@@ -149,7 +155,8 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => PostListPage(groupId: result['groupId']),
+                      builder: (_) =>
+                          PostListPage(groupId: result['groupId']),
                     ),
                   );
                 }
