@@ -1,25 +1,45 @@
 // lib/auth.ts
+import jwt from "jsonwebtoken";
+import type { NextApiRequest } from "next";
 
-import { NextApiRequest, NextApiResponse } from 'next';
-import jwt from 'jsonwebtoken';
+type JwtPayload = {
+  userId?: string;     // 앱에서 쓰던 형태
+  sub?: string;        // 이전(또는 다른 서비스)에서 쓰던 형태
+  email?: string;
+  iat?: number;
+  exp?: number;
+};
 
-const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
+export function signJwt(payload: JwtPayload) {
+  const secret = process.env.JWT_SECRET!;
+  return jwt.sign(payload, secret, { expiresIn: "7d" });
+}
 
-export function verifyToken(req: NextApiRequest, res: NextApiResponse) {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).json({ message: '인증 정보가 없습니다.' });
-    return null;
-  }
-
-  const token = authHeader.split(' ')[1];
-
+export function verifyJwt(token: string): JwtPayload | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    return decoded; // { sub: userId, email: ... }
-  } catch (err) {
-    res.status(401).json({ message: '유효하지 않은 토큰입니다.' });
+    const secret = process.env.JWT_SECRET!;
+    return jwt.verify(token, secret) as JwtPayload;
+  } catch {
     return null;
   }
+}
+
+export function getTokenFromReq(req: NextApiRequest): string | null {
+  const auth = req.headers.authorization ?? "";
+  return auth.startsWith("Bearer ") ? auth.slice(7) : null;
+}
+
+export function getUserIdFromReq(req: NextApiRequest): string | null {
+  const token = getTokenFromReq(req);
+  if (!token) return null;
+
+  const payload = verifyJwt(token);
+  // 🔑 핵심: sub → userId 순으로 모두 대응
+  const uid = payload?.userId ?? payload?.sub ?? null;
+
+  // ▼ 임시 디버깅 로그 (원인 확정 후 지워도 됨)
+  if (!uid) {
+    console.error("[AUTH] token present but no uid/sub in payload:", payload);
+  }
+  return uid ?? null;
 }

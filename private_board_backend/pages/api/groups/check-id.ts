@@ -1,25 +1,28 @@
-import { NextApiRequest, NextApiResponse } from 'next'
-import { prisma } from '../../../lib/prisma'
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { prisma } from '../../../lib/prisma';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ message: 'Method not allowed' })
+  try {
+    if (req.method !== 'GET') {
+      return res.status(405).json({ ok: false, error: 'Method not allowed' });
+    }
+
+    const raw = req.query.groupId;
+    const groupIdRaw = Array.isArray(raw) ? raw[0] : raw;
+    const groupId = (groupIdRaw ?? '').trim().toLowerCase();
+
+    if (!groupId) {
+      return res.status(400).json({ ok: false, error: 'Missing groupId' });
+    }
+
+    const existing = await prisma.group.findUnique({
+      where: { groupId },
+      select: { id: true },
+    });
+
+    return res.status(200).json({ ok: true, available: !existing });
+  } catch (err) {
+    console.error('[check-id][pages]', err);
+    return res.status(500).json({ ok: false, error: 'Server error' });
   }
-
-const groupId = req.query.groupId;
-if (!groupId || typeof groupId !== 'string') {
-  return res.status(400).json({ message: 'Missing groupId' });
-}
-
-try {
-  const existing = await prisma.group.findUnique({
-    where: { loginId: groupId }, // ✅ 여기!
-  });
-
-  return res.status(200).json({ available: !existing });
-} catch (error) {
-  console.error('check-id error', error);
-  return res.status(500).json({ message: 'Internal server error' });
-}
-
 }

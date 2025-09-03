@@ -19,8 +19,8 @@ CREATE TABLE "User" (
 -- CreateTable
 CREATE TABLE "Group" (
     "id" TEXT NOT NULL,
-    "loginId" TEXT NOT NULL,
-    "password" TEXT NOT NULL,
+    "groupId" TEXT NOT NULL,
+    "passwordHash" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "invitationCode" TEXT NOT NULL,
     "hasAdmin" BOOLEAN NOT NULL DEFAULT false,
@@ -70,7 +70,7 @@ CREATE TABLE "GroupJoinRequest" (
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Group_loginId_key" ON "Group"("loginId");
+CREATE UNIQUE INDEX "Group_groupId_key" ON "Group"("groupId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Group_invitationCode_key" ON "Group"("invitationCode");

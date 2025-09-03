@@ -8,52 +8,54 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
+  id           String             @id @default(uuid())
+  email        String             @unique
+  password     String
+  createdAt    DateTime           @default(now())
+  role         Role               @default(USER)
 
-  // 🔹 추가된 필드들
-  role      Role     @default(USER)
-  groupId   String?  // 그룹에 소속될 수 있음
-  group     Group?   @relation(fields: [groupId], references: [id])
+  // (기존) 단일 그룹 소속 구조 — 지금 당장은 유지
+  groupId      String?
+  Group        Group?             @relation(fields: [groupId], references: [id])
 
-  posts     Post[]
-  reactions Reaction[]
+  // (신규) 내가 만든 그룹들(소유자 관점)
+  ownedGroups  Group[]            @relation("GroupOwner")
 
   joinRequests GroupJoinRequest[]
-
+  posts        Post[]
+  reactions    Reaction[]
 }
 
 model Group {
-  id             String   @id @default(uuid())
-  loginId        String   @unique
-  password       String
+  id             String             @id @default(uuid())
+  groupId        String             @unique
+  passwordHash   String
   name           String
-  invitationCode String   @unique
-  hasAdmin       Boolean  @default(false)
-  createdAt      DateTime @default(now())
+  invitationCode String             @unique
+  hasAdmin       Boolean            @default(false)
+  createdAt      DateTime           @default(now())
 
-  users          User[]
+  // (기존) 사용자 배열 — 지금은 유지 (추후 GroupMember로 교체 예정)
+  User           User[]
+
+  joinRequests   GroupJoinRequest[]
   posts          Post[]
 
-  joinRequests GroupJoinRequest[]
-
+  // (신규) 그룹 소유자 FK
+  createdById    String?
+  createdBy      User?              @relation("GroupOwner", fields: [createdById], references: [id], onDelete: SetNull)
 }
 
 model Post {
-  id        String   @id @default(uuid())
+  id        String     @id @default(uuid())
   title     String
   content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   authorId  String
-
-  groupId   String   // 🔹 작성된 글이 어떤 그룹에 속하는지
-  group     Group    @relation(fields: [groupId], references: [id])
-
+  groupId   String
+  author    User       @relation(fields: [authorId], references: [id])
+  group     Group      @relation(fields: [groupId], references: [id])
   reactions Reaction[]
 }
 
@@ -62,32 +64,28 @@ model Reaction {
   emojiKey  String
   emoji     String
   createdAt DateTime @default(now())
-
-  user      User     @relation(fields: [userId], references: [id])
   userId    String
-
-  post      Post     @relation(fields: [postId], references: [id])
   postId    String
+  post      Post     @relation(fields: [postId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 
-  @@unique([userId, postId]) // 한 게시글당 한 유저는 하나의 반응만
+  @@unique([userId, postId])
+}
+
+model GroupJoinRequest {
+  id        String     @id @default(uuid())
+  userId    String
+  groupId   String
+  status    JoinStatus @default(PENDING)
+  message   String?
+  createdAt DateTime   @default(now())
+  group     Group      @relation(fields: [groupId], references: [id])
+  user      User       @relation(fields: [userId], references: [id])
 }
 
 enum Role {
   USER
   ADMIN
-}
-
-model GroupJoinRequest {
-  id        String     @id @default(uuid())
-  user      User       @relation(fields: [userId], references: [id])
-  userId    String
-
-  group     Group      @relation(fields: [groupId], references: [id])
-  groupId   String
-
-  status    JoinStatus @default(PENDING)
-  message   String? 
-  createdAt DateTime   @default(now())
 }
 
 enum JoinStatus {

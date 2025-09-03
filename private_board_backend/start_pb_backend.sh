@@ -6,7 +6,7 @@ sudo docker start pb-postgres
 echo "✅ PostgreSQL started."
 
 echo "🚀 Starting NestJS backend..."
-cd ~/projects/private-board/private_board_backend
+cd ~/project/private-board/private_board_backend
 
 npm run dev
 
