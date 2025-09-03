@@ -1,0 +1,158 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  displayName  String?
+  createdAt    DateTime @default(now())
+
+  groups       Group[]       @relation("UserGroups")
+  memberships  GroupMember[]
+  posts        Post[]
+  comments     Comment[]
+  postReacts   PostReaction[]
+  commentReacts CommentReaction[]
+
+  @@map("user")
+}
+
+model Group {
+  id           String   @id @default(uuid())
+  groupName    String
+  groupId      String   @unique
+  passwordHash String?
+  createdAt    DateTime @default(now())
+
+  createdById  String
+  createdBy    User @relation(
+    name: "UserGroups",
+    fields: [createdById],
+    references: [id],
+    onUpdate: Cascade,
+    onDelete: Restrict
+  )
+
+  members GroupMember[]
+  posts   Post[]
+
+  @@map("group")
+}
+
+model GroupMember {
+  id        String   @id @default(uuid())
+  groupId   String
+  userId    String
+  role      Role     @default(MEMBER)
+  status    Status   @default(ACTIVE)
+  joinedAt  DateTime @default(now())
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([groupId, userId])
+  @@map("group_member")
+}
+
+model Post {
+  id        String   @id @default(uuid())
+  groupId   String
+  authorId  String
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  group     Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  author    User  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  reactions PostReaction[]
+  comments  Comment[]
+
+  @@map("post")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  postId    String
+  authorId  String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  reactions CommentReaction[]
+
+  @@map("comment")
+}
+
+model PostReaction {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  type      ReactionType
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId, type])
+  @@map("post_reaction")
+}
+
+model CommentReaction {
+  id        String   @id @default(uuid())
+  commentId String
+  userId    String
+  type      ReactionType
+  createdAt DateTime @default(now())
+
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId, type])
+  @@map("comment_reaction")
+}
+
+model InviteCode {
+  id         String   @id @default(uuid())
+  groupId    String
+  code       String   @unique
+  expiresAt  DateTime?
+  maxUses    Int?
+  useCount   Int      @default(0)
+  createdAt  DateTime @default(now())
+  createdById String
+
+  group     Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  createdBy User  @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@map("invite_code")
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum Status {
+  ACTIVE
+  PENDING
+  BANNED
+  LEFT
+}
+
+enum ReactionType {
+  LIKE
+  LOVE
+  LAUGH
+  WOW
+  SAD
+  ANGRY
+}
