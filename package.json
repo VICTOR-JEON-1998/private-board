@@ -1,5 +1,29 @@
 {
+  "name": "private-board-backend",
+  "version": "1.0.0",
+  "scripts": {
+    "prisma:gen": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "start": "cross-env PORT=${PORT:-3000} node dist/main.js",
+    "start:dev": "cross-env PORT=${PORT:-3000} nest start --watch",
+    "seed": "ts-node prisma/seed.ts"
+  },
   "dependencies": {
-    "jsonwebtoken": "^9.0.2"
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0",
+    "@nestjs/platform-express": "^10.0.0",
+    "@prisma/client": "^5.0.0",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.0",
+    "cross-env": "^7.0.3",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^10.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.4.0",
+    "prisma": "^5.0.0"
   }
 }
