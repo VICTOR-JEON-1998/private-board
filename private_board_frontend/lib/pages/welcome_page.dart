@@ -6,9 +6,8 @@ import 'group_home_page.dart';
 import 'login_page.dart';
 
 class WelcomePage extends ConsumerWidget {
-  final String userId;
   final String email;
-  const WelcomePage({Key? key, required this.userId, required this.email}) : super(key: key);
+  const WelcomePage({Key? key, required this.email}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -32,7 +31,7 @@ class WelcomePage extends ConsumerWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => GroupHomePage(userId: userId)),
+                  MaterialPageRoute(builder: (_) => const GroupHomePage()),
                 );
               },
               child: const Text('그룹 목록 보기'),
@@ -42,7 +41,6 @@ class WelcomePage extends ConsumerWidget {
               onPressed: () async {
                 await AuthService.logout();
                 ref.read(tokenProvider.notifier).state = '';
-                ref.read(userIdProvider.notifier).state = '';
                 ref.read(userEmailProvider.notifier).state = '';
                 if (context.mounted) {
                   Navigator.pushAndRemoveUntil(
