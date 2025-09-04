@@ -25,7 +25,7 @@ class AuthService {
     }
   }
 
-  /// 🔑 로그인 및 토큰/유저ID 저장
+  /// 🔑 로그인 및 토큰 저장
   static Future<Map<String, dynamic>?> login(String email, String password) async {
     final dio = Dio();
     try {
@@ -42,13 +42,11 @@ class AuthService {
       print('로그인 응답 데이터: ${response.data}');
 
       final token = response.data['accessToken'] ?? response.data['token'];
-      final userId = response.data['user']?['id'];
       final userEmail = response.data['user']?['email'];
 
-      if (token != null && userId != null && userEmail != null) {
+      if (token != null && userEmail != null) {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('accessToken', token);
-        await prefs.setString('userId', userId);
         await prefs.setString('userEmail', userEmail);
         return response.data; // 전체 response 반환
       }
@@ -64,23 +62,16 @@ class AuthService {
     return prefs.getString('accessToken');
   }
 
-  /// 현재 저장된 유저 ID 가져오기
-  static Future<String?> getUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('userId');
-  }
-
   /// 현재 저장된 유저 이메일 가져오기
   static Future<String?> getUserEmail() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('userEmail');
   }
 
-  /// 로그아웃 (토큰 + 유저ID 삭제)
+  /// 로그아웃 (토큰 + 유저이메일 삭제)
   static Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('accessToken');
-    await prefs.remove('userId');
     await prefs.remove('userEmail');
   }
 

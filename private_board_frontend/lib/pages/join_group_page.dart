@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/group_provider.dart';
+import '../providers/auth_provider.dart';
 
 class JoinGroupPage extends ConsumerStatefulWidget {
-  final String userId;
-  const JoinGroupPage({Key? key, required this.userId}) : super(key: key); // ✅ 수정
+  const JoinGroupPage({Key? key}) : super(key: key);
 
 
   @override
@@ -49,11 +49,12 @@ class _JoinGroupPageState extends ConsumerState<JoinGroupPage> {
             ElevatedButton(
               onPressed: () async {
                 final groupService = ref.read(groupServiceProvider);
+                final token = ref.read(tokenProvider);
                 try {
                   final result = await groupService.joinGroupByCredential(
                     groupId: idController.text,
                     password: pwController.text,
-                    userId: widget.userId,
+                    token: token,
                   );
                   if (context.mounted) {
                     showDialog(
