@@ -15,5 +15,5 @@ final Map<String, WidgetBuilder> appRoutes = {
   '/write': (context) => const WritePage(),
   '/profile': (context) => const ProfilePage(),
   '/join-group': (context) => const JoinGroupPage(),
-  '/group': (context) => const GroupHomePage(userId: ''), // 👉 추후 실제 userId 넘길 것
+  '/group': (context) => const GroupHomePage(),
 };

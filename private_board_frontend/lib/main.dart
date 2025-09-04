@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'pages/login_page.dart';
-import 'pages/group_home_page.dart';
 import 'pages/welcome_page.dart';
 import 'services/auth_service.dart';
 
@@ -18,13 +17,12 @@ class MyApp extends StatelessWidget {
 
   Future<Widget> getStartPage() async {
     final token = await AuthService.getToken();
-    final userId = await AuthService.getUserId();
     final email = await AuthService.getUserEmail();
     print('앱 시작 토큰 체크: "$token"'); // (디버깅용)
-    if (token == null || token.isEmpty || userId == null || email == null) {
+    if (token == null || token.isEmpty || email == null) {
       return const LoginPage();
     } else {
-      return WelcomePage(userId: userId, email: email);
+      return WelcomePage(email: email);
     }
   }
 

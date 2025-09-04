@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/group_provider.dart';
+import '../providers/auth_provider.dart';
 import 'create_group_page.dart';
 import 'join_group_page.dart';
 import 'post_list_page.dart';
 
 class GroupHomePage extends ConsumerStatefulWidget {
-  final String userId;
-  const GroupHomePage({required this.userId, Key? key}) : super(key: key);
+  const GroupHomePage({Key? key}) : super(key: key);
 
   @override
   ConsumerState<GroupHomePage> createState() => _GroupHomePageState();
@@ -25,8 +25,9 @@ class _GroupHomePageState extends ConsumerState<GroupHomePage> {
 
   Future<void> _loadGroups() async {
     final service = ref.read(groupServiceProvider);
+    final token = ref.read(tokenProvider);
     try {
-      final data = await service.getGroups(userId: widget.userId);
+      final data = await service.getGroups(token);
       setState(() {
         groups = data;
         _loading = false;
@@ -85,11 +86,11 @@ class _GroupHomePageState extends ConsumerState<GroupHomePage> {
                       const SizedBox(width: 12),
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => JoinGroupPage(userId: widget.userId)),
-                          );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const JoinGroupPage()),
+                            );
                         },
                         child: const Text('그룹 참여'),
                       ),

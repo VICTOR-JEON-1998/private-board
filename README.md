@@ -416,15 +416,15 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
 ### 🔐 1. 로그인 기능 수정
 - `AuthService.login()`이 `Map<String, dynamic>` 반환하도록 수정
-- 로그인 시 토큰 + 유저 ID 저장
-- 로그인 성공 후 `GroupHomePage(userId: ...)`로 이동
+- 로그인 시 토큰 + 이메일 저장
+- 로그인 성공 후 `GroupHomePage`로 이동
 
 ### ⚙️ 2. ProviderScope 적용
 - `main.dart`에서 `ProviderScope`로 전체 앱 감싸기
 - 모든 `ref.read(...)` 사용 가능하도록 구성
 
 ### 🧠 3. 상태 관리 구조 구축
-- `tokenProvider`, `userIdProvider` (`auth_provider.dart`) 정의
+- `tokenProvider`, `userEmailProvider` (`auth_provider.dart`) 정의
 - 로그인 시 상태에 저장 → 전역에서 사용 가능
 - `dioProvider`: 자동으로 Authorization 헤더 주입
 
@@ -435,7 +435,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 ### 🖼️ 5. 그룹 UI 구성
 - `GroupHomePage`: 그룹 생성, 참여 버튼 포함
 - `CreateGroupPage`: 그룹 이름/관리자 여부 입력 후 생성
-- `JoinGroupPage`: 초대코드 입력 후 참여 (userId 헤더 전달)
+- `JoinGroupPage`: 초대코드 입력 후 참여 (토큰 사용)
 
 ---
 
@@ -446,14 +446,14 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 | `No ProviderScope` | `main.dart`에서 `ProviderScope` 적용 |
 | `ref.read()` 사용 불가 | `LoginPage`를 `ConsumerStatefulWidget`으로 변경 |
 | `AuthService.login()` 반환값 bool → 객체 변경 | 상태 저장 및 리디렉션 가능해짐 |
-| 그룹 참여 시 `userId` 전달 오류 | `JoinGroupPage(userId: ...)` 생성자 및 필드 추가 |
+| 그룹 참여 시 토큰 미전달 문제 | `JoinGroupPage`에서 토큰 기반 요청으로 수정 |
 
 ---
 
 ## ✅ 다음 작업
 
 1. `GroupHomePage` 진입 시 **이미 참여한 그룹이면 리다이렉션** 처리
-2. `SharedPreferences` → `token`, `userId`로 자동 로그인 이어가기
+2. `SharedPreferences` → `token`, `userEmail`로 자동 로그인 이어가기
 3. 그룹 내부 글 목록 불러오기 (PostList)
 4. 마니또 기능 기획 및 설계 시작
 

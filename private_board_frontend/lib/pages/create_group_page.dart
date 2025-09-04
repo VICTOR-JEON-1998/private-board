@@ -131,7 +131,6 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
                 final name = nameController.text.trim();
                 final gid = idController.text.trim();
                 final pw  = pwController.text;
-                final userId = ref.watch(userIdProvider);
 
 
                 // 클라이언트 측 유효성 검사
@@ -162,7 +161,6 @@ class _CreateGroupPageState extends ConsumerState<CreateGroupPage> {
                     groupId: gid,
                     password: pw,
                     token: token,
-                    userId : userId,
                   );
 
                   if (result['status'] == 'conflict') {
