@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma';
+import { getUserIdFromReq } from '@/lib/auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -7,10 +8,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const { invitationCode } = req.body;
-  const userId = req.headers['x-user-id']; // 추후 JWT 파싱으로 교체 예정
-
-  if (!invitationCode || !userId) {
+  if (!invitationCode) {
     return res.status(400).json({ message: '필수 정보가 누락되었습니다.' });
+  }
+
+  const userId = getUserIdFromReq(req);
+  if (!userId) {
+    return res.status(401).json({ message: 'Unauthorized' });
   }
 
   const group = await prisma.group.findUnique({
@@ -22,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   await prisma.user.update({
-    where: { id: String(userId) },
+    where: { id: userId },
     data: { groupId: group.id },
   });
 
