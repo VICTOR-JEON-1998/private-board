@@ -1,16 +1,20 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma'; // 실제 경로에 맞게 조정
+import { getUserIdFromReq } from '@/lib/auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const { invitationCode } = req.body;
-  const userId = req.headers['x-user-id'];
+  const { invitationCode, message } = req.body;
+  if (!invitationCode) {
+    return res.status(400).json({ message: 'Missing invitationCode' });
+  }
 
-  if (!invitationCode || typeof userId !== 'string') {
-    return res.status(400).json({ message: 'Missing invitationCode or userId' });
+  const userId = getUserIdFromReq(req);
+  if (!userId) {
+    return res.status(401).json({ message: 'Unauthorized' });
   }
 
   try {

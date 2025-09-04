@@ -1,15 +1,19 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { prisma } from '@/lib/prisma';
+import { getUserIdFromReq } from '@/lib/auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const adminId = req.headers['x-user-id'];
+  const adminId = getUserIdFromReq(req);
   const { userId } = req.body;
 
-  if (typeof adminId !== 'string' || !userId) {
+  if (!adminId) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+  if (!userId) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
 
