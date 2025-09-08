@@ -56,4 +56,13 @@ export class GroupsService {
       memberCount: group.members.length,
     };
   }
+
+  async isGroupIdAvailable(groupId: string) {
+    if (!groupId) throw new BadRequestException('groupId is required');
+    const existing = await this.prisma.group.findUnique({
+      where: { groupId },
+      select: { id: true },
+    });
+    return !existing;
+  }
 }
