@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards, Req, Query } from '@nestjs/common';
 import { GroupsService } from './groups.service';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { JoinGroupDto } from './dto/join-group.dto';
@@ -18,6 +18,12 @@ export class GroupsController {
   @Post('join')
   join(@Req() req, @Body() dto: JoinGroupDto) {
     return this.groupsService.joinGroup(req.user.id, dto.groupId, dto.password);
+  }
+
+  @Get('check-id')
+  async checkId(@Query('groupId') groupId: string) {
+    const available = await this.groupsService.isGroupIdAvailable(groupId);
+    return { available };
   }
 
   @UseGuards(JwtAuthGuard)
