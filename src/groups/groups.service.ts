@@ -1,15 +1,16 @@
 import { Injectable, BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PrismaClient, Role } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import { InvitesService } from '../invites/invites.service';
 
 @Injectable()
 export class GroupsService {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: PrismaClient, private invitesService: InvitesService) {}
 
   async createGroup(userId: string, groupName: string, groupId: string, password?: string) {
     const hash = password ? await bcrypt.hash(password, 10) : undefined;
     try {
-      return await this.prisma.group.create({
+      const group = await this.prisma.group.create({
         data: {
           groupName,
           groupId,
@@ -23,6 +24,8 @@ export class GroupsService {
           },
         },
       });
+      await this.invitesService.createCode(userId, group.id);
+      return group;
     } catch (e) {
       throw new BadRequestException('Group creation failed');
     }

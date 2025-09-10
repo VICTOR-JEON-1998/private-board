@@ -31,11 +31,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     try {
       // 🔍 3. 유저가 해당 그룹 소속인지 확인
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
+      const membership = await prisma.groupMember.findFirst({
+        where: { groupId, userId },
       })
 
-      if (!user || user.groupId !== groupId) {
+      if (!membership) {
         return res.status(403).json({ message: 'User is not a member of this group' })
       }
 
