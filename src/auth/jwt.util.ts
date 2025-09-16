@@ -28,7 +28,15 @@ export function getJwtSecret(): string {
 }
 
 export function signJwt(payload: JwtPayload) {
-  return jwt.sign(payload, getJwtSecret(), { expiresIn: '7d' })
+  const { sub, userId, ...rest } = payload
+  const resolvedId = sub ?? userId
+
+  const normalizedPayload: JwtPayload = {
+    ...rest,
+    ...(resolvedId != null ? { sub: resolvedId, userId: resolvedId } : {}),
+  }
+
+  return jwt.sign(normalizedPayload, getJwtSecret(), { expiresIn: '7d' })
 }
 
 export function verifyJwt(token: string): JwtPayload | null {

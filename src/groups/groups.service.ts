@@ -1,11 +1,12 @@
 import { Injectable, BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
-import { PrismaClient, Role } from '@prisma/client';
+import { Role } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { InvitesService } from '../invites/invites.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class GroupsService {
-  constructor(private prisma: PrismaClient, private invitesService: InvitesService) {}
+  constructor(private prisma: PrismaService, private invitesService: InvitesService) {}
 
   async createGroup(userId: string, groupName: string, groupId: string, password?: string) {
     const hash = password ? await bcrypt.hash(password, 10) : undefined;

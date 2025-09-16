@@ -1,10 +1,10 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 import { randomBytes } from 'crypto';
 
 @Injectable()
 export class InvitesService {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: PrismaService) {}
 
   async createCode(userId: string, groupId: string, expiresAt?: Date, maxUses?: number) {
     const code = randomBytes(3).toString('hex');

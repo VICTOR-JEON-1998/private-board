@@ -7,10 +7,12 @@ import { PostsModule } from './posts/posts.module';
 import { CommentsModule } from './comments/comments.module';
 import { ReactionsModule } from './reactions/reactions.module';
 import { InvitesModule } from './invites/invites.module';
+import { PrismaModule } from './prisma/prisma.module';
 import { AppController } from './app.controller';
 
 @Module({
   imports: [
+    PrismaModule,
     AuthModule,
     UsersModule,
     GroupsModule,

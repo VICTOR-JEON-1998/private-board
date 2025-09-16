@@ -1,8 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { PrismaClient } from '@prisma/client'
 import { getTokenFromReq, verifyJwt } from '@/lib/auth'
-
-const prisma = new PrismaClient()
+import prisma from '@/lib/prisma'
 
 function getAuthenticatedUserId(req: NextApiRequest, res: NextApiResponse): string | null {
   const token = getTokenFromReq(req)
