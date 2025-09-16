@@ -2,7 +2,7 @@
 import jwt from "jsonwebtoken";
 import type { NextApiRequest } from "next";
 
-type JwtPayload = {
+export type JwtPayload = {
   userId?: string;     // 앱에서 쓰던 형태
   sub?: string;        // 이전(또는 다른 서비스)에서 쓰던 형태
   email?: string;
@@ -10,15 +10,32 @@ type JwtPayload = {
   exp?: number;
 };
 
+let cachedSecret: string | null = null;
+
+export function getJwtSecret(): string {
+  if (cachedSecret) {
+    return cachedSecret;
+  }
+
+  const secret = process.env.JWT_SECRET?.trim();
+
+  if (!secret) {
+    const message = "JWT_SECRET environment variable must be provided";
+    console.error(`[AUTH] ${message}`);
+    throw new Error(message);
+  }
+
+  cachedSecret = secret;
+  return cachedSecret;
+}
+
 export function signJwt(payload: JwtPayload) {
-  const secret = process.env.JWT_SECRET!;
-  return jwt.sign(payload, secret, { expiresIn: "7d" });
+  return jwt.sign(payload, getJwtSecret(), { expiresIn: "7d" });
 }
 
 export function verifyJwt(token: string): JwtPayload | null {
   try {
-    const secret = process.env.JWT_SECRET!;
-    return jwt.verify(token, secret) as JwtPayload;
+    return jwt.verify(token, getJwtSecret()) as JwtPayload;
   } catch {
     return null;
   }

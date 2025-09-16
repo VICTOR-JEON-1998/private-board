@@ -1,25 +1,20 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
-import jwt from 'jsonwebtoken'
+import { getTokenFromReq, verifyJwt } from '@/lib/auth'
 
 const prisma = new PrismaClient()
-const JWT_SECRET = process.env.JWT_SECRET || 'default_secret'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     // 🔐 1. 토큰 검증
-    const authHeader = req.headers.authorization
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    const token = getTokenFromReq(req)
+    if (!token) {
       return res.status(401).json({ message: 'No token provided' })
     }
 
-    const token = authHeader.split(' ')[1]
-    let userId: string
-
-    try {
-      const decoded = jwt.verify(token, JWT_SECRET) as { sub: string }
-      userId = decoded.sub
-    } catch (err) {
+    const decoded = verifyJwt(token)
+    const userId = decoded?.sub ?? decoded?.userId
+    if (!userId) {
       return res.status(401).json({ message: 'Invalid token' })
     }
 

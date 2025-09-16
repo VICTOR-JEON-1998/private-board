@@ -3,10 +3,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
+import { signJwt } from '@/lib/auth'
 
 const prisma = new PrismaClient()
-const JWT_SECRET = process.env.JWT_SECRET || 'default_secret'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -31,11 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ message: '이메일 또는 비밀번호가 올바르지 않습니다.' })
     }
 
-    const token = jwt.sign(
-      { sub: user.id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    )
+    const token = signJwt({ sub: user.id, email: user.email })
 
     return res.status(200).json({
       token,

@@ -1,28 +1,32 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
-import jwt from 'jsonwebtoken'
+import { getTokenFromReq, verifyJwt } from '@/lib/auth'
 
 const prisma = new PrismaClient()
-const JWT_SECRET = process.env.JWT_SECRET || 'default_secret'
+
+function getAuthenticatedUserId(req: NextApiRequest, res: NextApiResponse): string | null {
+  const token = getTokenFromReq(req)
+  if (!token) {
+    res.status(401).json({ message: 'No token provided' })
+    return null
+  }
+
+  const decoded = verifyJwt(token)
+  const userId = decoded?.userId ?? decoded?.sub
+  if (!userId) {
+    res.status(401).json({ message: 'Invalid token' })
+    return null
+  }
+
+  return userId
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query
 
   if (req.method === 'PUT') {
-    const authHeader = req.headers.authorization
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'No token provided' })
-    }
-
-    const token = authHeader.split(' ')[1]
-    let userId: string
-
-    try {
-      const decoded = jwt.verify(token, JWT_SECRET) as { userId: string }
-      userId = decoded.userId
-    } catch (err) {
-      return res.status(401).json({ message: 'Invalid token' })
-    }
+    const userId = getAuthenticatedUserId(req, res)
+    if (!userId) return
 
     const { title, content } = req.body
     if (!title || !content) {
@@ -56,20 +60,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === 'DELETE') {
-    const authHeader = req.headers.authorization
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ message: 'No token provided' })
-    }
-
-    const token = authHeader.split(' ')[1]
-    let userId: string
-
-    try {
-      const decoded = jwt.verify(token, JWT_SECRET) as { userId: string }
-      userId = decoded.userId
-    } catch (err) {
-      return res.status(401).json({ message: 'Invalid token' })
-    }
+    const userId = getAuthenticatedUserId(req, res)
+    if (!userId) return
     // 🔐 권한 체크
     const existingPost = await prisma.post.findUnique({
       where: { id: String(id) }

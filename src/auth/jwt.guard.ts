@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
-import * as jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
+import { verifyJwt } from './jwt.util';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -13,8 +13,13 @@ export class JwtAuthGuard implements CanActivate {
     const [scheme, token] = auth.split(' ');
     if (scheme !== 'Bearer' || !token) throw new UnauthorizedException('Invalid token');
     try {
-      const payload = jwt.verify(token, process.env.JWT_SECRET || 'secret') as { sub: string };
-      const user = await this.prisma.user.findUnique({ where: { id: payload.sub } });
+      const payload = verifyJwt(token);
+      const userId = payload?.sub ?? payload?.userId;
+      if (!userId) {
+        throw new UnauthorizedException('Invalid token');
+      }
+
+      const user = await this.prisma.user.findUnique({ where: { id: userId } });
       if (!user) throw new UnauthorizedException('User not found');
       request.user = { id: user.id };
       return true;
