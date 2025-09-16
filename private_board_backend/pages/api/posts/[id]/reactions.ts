@@ -1,8 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { PrismaClient } from '@prisma/client'
 import { verifyToken } from '../../../../lib/verifyToken'
-
-const prisma = new PrismaClient()
+import prisma from '@/lib/prisma'
 
 
 
