@@ -1,14 +1,21 @@
 // lib/verifyToken.ts
-import jwt from 'jsonwebtoken'
-import { JwtPayload } from 'jsonwebtoken'
+import { verifyJwt } from './auth'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'default_secret'
-
-export function verifyToken(token: string): { userId: string, email: string } | null {
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload
-    return { userId: decoded.sub as string, email: decoded.email }
-  } catch (error) {
+export function verifyToken(token: string | undefined): { userId: string, email?: string } | null {
+  if (!token) {
     return null
   }
+
+  const decoded = verifyJwt(token)
+  if (!decoded) {
+    return null
+  }
+
+  const userId = decoded.sub ?? decoded.userId
+
+  if (!userId) {
+    return null
+  }
+
+  return { userId, email: decoded.email }
 }
