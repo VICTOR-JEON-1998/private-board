@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
 import { InvitesService } from './invites.service';
 import { InvitesController } from './invites.controller';
-import { PrismaClient } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt.guard';
 
 @Module({
-  providers: [InvitesService, PrismaClient, JwtAuthGuard],
+  providers: [InvitesService, JwtAuthGuard],
   controllers: [InvitesController],
   exports: [InvitesService],
 })

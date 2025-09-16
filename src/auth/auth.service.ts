@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 import { signJwt } from './jwt.util';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: PrismaService) {}
 
   async validateUser(email: string, displayName?: string) {
     const user = await this.prisma.user.upsert({
